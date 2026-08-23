@@ -1381,8 +1381,19 @@ async function makeCaption(){
     $('#copy-caption').disabled = false;
   };
   try{
-    fill((await ask(CAPTION_PROMPT(S.desc || S.headline, S.headline), 700))
-      .replace(/^(["'\u201c\u201d]+)|(["'\u201c\u201d]+)$/g, '').trim());
+    const response = await fetch('/.netlify/functions/caption', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        story: S.desc || S.headline,
+        headline: S.headline
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || `Caption service returned HTTP ${response.status}.`);
+    fill((data.description || '')
+      .replace(/^(\["'\u201c\u201d]+)|(["'\u201c\u201d]+)$/g, '').trim());
+    if(!S.caption) throw new Error('Caption service returned an empty description.');
     hide('#err-caption');
   }catch(e){
     fill(localCaption());

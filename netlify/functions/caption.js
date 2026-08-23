@@ -1,0 +1,80 @@
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'openai/gpt-oss-120b';
+
+const headers = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
+function json(statusCode, body) {
+  return { statusCode, headers, body: JSON.stringify(body) };
+}
+
+function captionPrompt(story, headline) {
+  return `Write a long Facebook post description based only on this news story and headline.
+
+STORY:
+"""${story}"""
+
+HEADLINE: "${headline}"
+
+AUDIENCE: People in Britain, especially thoughtful adults who care about fairness, household costs, public money, rules and whether ordinary people are being heard.
+
+RULES
+- Write in natural British English. Use British spelling and phrasing.
+- Write 130 to 190 words in 3 or 4 short paragraphs, easy to read on a phone.
+- Open with an emotional line that makes the reader feel why this matters in real life. Build curiosity without sensationalising.
+- Explain the relevant facts clearly and fairly. Do not invent details, motives, quotes, figures or consequences that are not in the story.
+- Connect the issue to everyday British life only when the story supports that connection.
+- End with one direct, open question inviting people to share their view in the comments.
+- No hashtags, emojis, headings, quotation marks around the whole answer, or instructions to like and share.
+
+Output only the finished description.`;
+}
+
+exports.handler = async function handler(event) {
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
+  if (event.httpMethod !== 'POST') return json(405, { detail: 'POST required.' });
+
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return json(500, { detail: 'GROQ_API_KEY is not configured in Netlify.' });
+
+  let request;
+  try {
+    request = JSON.parse(event.body || '{}');
+  } catch {
+    return json(400, { detail: 'Invalid JSON request.' });
+  }
+
+  const story = typeof request.story === 'string' ? request.story.trim() : '';
+  const headline = typeof request.headline === 'string' ? request.headline.trim() : '';
+  if (!story || story.length > 20000 || !headline || headline.length > 500) {
+    return json(400, { detail: 'A valid story and headline are required.' });
+  }
+
+  try {
+    const response = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: 'user', content: captionPrompt(story, headline) }],
+        temperature: 0.8,
+        max_tokens: 500
+      })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return json(502, { detail: data?.error?.message || 'Groq rejected the request.' });
+    }
+
+    const description = data?.choices?.[0]?.message?.content?.trim();
+    if (!description) return json(502, { detail: 'Groq returned an empty description.' });
+    return json(200, { description });
+  } catch {
+    return json(502, { detail: 'Could not reach Groq.' });
+  }
+};
