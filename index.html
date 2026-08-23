@@ -274,6 +274,17 @@
       <label class="lbl" style="margin-top:10px" for="hl-hi2">Words in red <span style="opacity:.6">— comma separated, add as many as you like</span></label>
       <input type="text" id="hl-hi2" placeholder="e.g. PRISON, INTERDIT, SCANDALE">
 
+      <div class="freegen" style="margin-top:14px">
+        <div class="freegen-head">Facebook post description</div>
+        <div class="row">
+          <button class="btn" id="gen-caption" style="flex:0 0 auto">Write the description</button>
+          <button class="btn ghost sm" id="copy-caption" style="flex:0 0 auto" disabled>Copy description</button>
+        </div>
+        <label class="lbl" style="margin-top:12px" for="caption">Long description — edit freely before posting</label>
+        <textarea id="caption" style="min-height:190px" placeholder="Choose a headline, then write the description."></textarea>
+        <div class="err" id="err-caption" hidden></div>
+      </div>
+
       <div class="row" style="margin-top:12px">
         <div style="flex:0 0 140px;min-width:120px">
           <label class="lbl" for="lbl-yes">Thumb label (YES)</label>
@@ -436,6 +447,7 @@
 const S = {
   desc:'', headlines:[], pick:-1,
   headline:'', highlight:'', highlight2:'', yes:'OUI', no:'NON',
+  caption:'',
   prompt:'', img:null, zoom:1, ox:0, oy:0,
   tpl:'A', size:'1:1',
   react:true, emoji:false, badge:'DÉBAT',
@@ -1160,6 +1172,26 @@ RULES
 
 Output exactly four lines. One headline per line. No numbers, no bullets, no labels, no blank lines, no commentary before or after.`;
 
+const CAPTION_PROMPT = (d, h) => `Write a long Facebook post description based only on this news story and headline.
+
+STORY:
+"""${d}"""
+
+HEADLINE: "${h}"
+
+AUDIENCE: People in Britain, especially thoughtful adults who care about fairness, household costs, public money, rules and whether ordinary people are being heard.
+
+RULES
+- Write in natural British English. Use British spelling and phrasing, such as "favour", "centre", "organise" and "whilst" only where they sound natural.
+- Write 130 to 190 words in 3 or 4 short paragraphs, easy to read on a phone.
+- Open with an emotional line that makes the reader feel why this matters in real life. Build curiosity without sensationalising.
+- Explain the relevant facts clearly and fairly. Do not invent details, motives, quotes, figures or consequences that are not in the story.
+- Connect the issue to everyday British life only when the story supports that connection; never pretend to know the reader's personal circumstances.
+- End with one direct, open question inviting people to share their view in the comments.
+- No hashtags, emojis, headings, quotation marks around the whole answer, or instructions to "like and share".
+
+Output only the finished description.`;
+
 /* where the text sits, so the photo leaves room for it */
 const COMPOSITION = {
   A:'the bottom 45% of the frame is covered by a solid panel, so put the subject in the upper half and leave the lower half quiet',
@@ -1201,6 +1233,13 @@ function localBrief(){
     + `natural overcast daylight, shallow depth of field, 35mm lens, muted realistic colour, documentary mood, `
     + `${COMPOSITION[S.tpl] || 'keep the lower half calm'}, `
     + `no text, no logos, no recognisable public figures, negative space where the caption sits.`;
+}
+
+function localCaption(){
+  const headline = (S.headline || 'This story deserves a closer look').trim();
+  const story = (S.desc || '').trim();
+  const detail = story ? story.replace(/\s+/g, ' ').slice(0, 320).replace(/[.!?]+$/, '') : 'The details matter, and so does the impact on ordinary people';
+  return `${headline}\n\nThis is the sort of story that can be easy to scroll past, but it raises a question many people in Britain will recognise: who benefits, who pays, and who gets a proper say?\n\n${detail}. Whatever your first reaction, the facts deserve a fair hearing before the arguments begin.\n\nWhere do you stand on this?`;
 }
 
 /* ---------- step 1 ---------- */
@@ -1330,6 +1369,26 @@ async function makePrompt(){
     show('#err3', explain(e) + ' A brief built from your headline is below — edit it, or use a chat with the box underneath.');
   }
   finally{ b.disabled = false; b.textContent = S.prompt ? 'Rewrite the brief' : 'Write the image brief'; }
+}
+
+async function makeCaption(){
+  if(!S.headline.trim()){ show('#err-caption','Pick or write a headline first — the description is built from it.'); return; }
+  const b = $('#gen-caption');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Writing…';
+  const fill = text => {
+    S.caption = text;
+    $('#caption').value = text;
+    $('#copy-caption').disabled = false;
+  };
+  try{
+    fill((await ask(CAPTION_PROMPT(S.desc || S.headline, S.headline), 700))
+      .replace(/^(["'\u201c\u201d]+)|(["'\u201c\u201d]+)$/g, '').trim());
+    hide('#err-caption');
+  }catch(e){
+    fill(localCaption());
+    show('#err-caption', explain(e) + ' A draft built from your headline is below — edit it before posting.');
+  }
+  finally{ b.disabled = false; b.textContent = S.caption ? 'Rewrite the description' : 'Write the description'; }
 }
 
 /* everything the browser can possibly decode ends up as a plain canvas,
@@ -1735,8 +1794,16 @@ $('#skip-ai').onclick = ()=>{
 $('#hl-text').oninput = e => { S.headline = e.target.value; paint(); };
 $('#hl-hi').oninput   = e => { S.highlight = e.target.value; paint(); };
 $('#hl-hi2').oninput  = e => { S.highlight2 = e.target.value; paint(); };
+$('#caption').oninput = e => { S.caption = e.target.value; $('#copy-caption').disabled = !S.caption.trim(); };
 $('#lbl-yes').oninput = e => { S.yes = e.target.value; paint(); };
 $('#lbl-no').oninput  = e => { S.no  = e.target.value; paint(); };
+
+$('#gen-caption').onclick = makeCaption;
+$('#copy-caption').onclick = async ()=>{
+  try{ await navigator.clipboard.writeText(S.caption); $('#copy-caption').textContent = 'Copied'; }
+  catch{ $('#caption').select(); $('#copy-caption').textContent = 'Press Ctrl+C'; }
+  setTimeout(()=> $('#copy-caption').textContent = 'Copy description', 1600);
+};
 
 $('#to-img').onclick = ()=>{
   if(!S.headline.trim()){ $('#hl-text').focus(); return; }
