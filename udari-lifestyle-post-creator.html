@@ -1,0 +1,1832 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Udari Lifestyle Post Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#08080a;          /* black */
+    --ink-2:#101012;
+    --ink-3:#1a1a1d;
+    --line:#2c2c30;
+    --text:#f2efe6;
+    --muted:#8d8b84;
+    --signal:#fac802;       /* the gold from the logo ring */
+    --red:#e0233a;
+    --blue:#2b6fdb;
+    --ok:#3fbf7f;
+    --r:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;letter-spacing:.01em;text-transform:uppercase}
+
+  /* ---------- shell ---------- */
+  header{
+    border-bottom:1px solid var(--line);
+    padding:14px 22px;
+    display:flex;align-items:center;gap:14px;
+    position:sticky;top:0;background:rgba(8,8,10,.93);backdrop-filter:blur(8px);z-index:20;
+  }
+  .mark{
+    width:34px;height:34px;border-radius:50%;flex:none;display:block;
+    box-shadow:0 0 0 1px rgba(250,200,2,.5), 0 2px 10px rgba(0,0,0,.6);
+  }
+  header h1{
+    font-family:Anton,Impact,sans-serif;font-size:17px;margin:0;font-weight:400;
+    letter-spacing:.035em;text-transform:uppercase;color:var(--signal);line-height:1.15;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  header h1 span{color:var(--text)}
+  header p{margin:0;color:var(--muted);font-size:12px}
+
+  .wrap{display:grid;grid-template-columns:minmax(0,1fr) 452px;gap:0;align-items:start}
+  @media (max-width:1040px){ .wrap{grid-template-columns:1fr} }
+
+  .flow{padding:22px 22px 120px;max-width:820px}
+  .stage{
+    position:sticky;top:59px;height:calc(100vh - 59px);
+    border-left:1px solid var(--line);background:var(--ink-2);
+    padding:20px;display:flex;flex-direction:column;gap:14px;overflow:auto;
+  }
+  @media (max-width:1040px){ .stage{position:static;height:auto;border-left:0;border-top:1px solid var(--line)} }
+
+  /* ---------- steps ---------- */
+  .step{
+    border:1px solid var(--line);border-radius:var(--r);background:var(--ink-2);
+    margin-bottom:12px;overflow:hidden;transition:opacity .2s;
+  }
+  .step[data-locked="1"]{opacity:.42;pointer-events:none}
+  .step-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+  .num{
+    flex:none;width:26px;height:26px;border-radius:6px;background:var(--ink-3);border:1px solid var(--line);
+    display:grid;place-items:center;font-family:Anton,Impact,sans-serif;font-size:14px;color:var(--muted);
+  }
+  .step[data-done="1"] .num{background:var(--signal);color:#08080a;border-color:var(--signal)}
+  .step-title{font-weight:600;font-size:14px;flex:1}
+  .step-sub{color:var(--muted);font-size:12px;font-weight:400;margin-left:8px}
+  .chev{color:var(--muted);font-size:11px}
+  .step-body{padding:0 16px 16px;display:none}
+  .step[data-open="1"] .step-body{display:block}
+
+  /* ---------- controls ---------- */
+  label.lbl{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+  textarea,input[type=text],select{
+    width:100%;background:var(--ink);border:1px solid var(--line);color:var(--text);
+    border-radius:8px;padding:10px 12px;font:inherit;font-size:13.5px;outline:none;
+  }
+  textarea{min-height:120px;resize:vertical;line-height:1.55}
+  textarea:focus,input[type=text]:focus,select:focus{border-color:#4a4740;box-shadow:0 0 0 3px rgba(250,200,2,.12)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:130px}
+
+  button{font:inherit;cursor:pointer;border:none;border-radius:8px}
+  .btn{
+    background:var(--signal);color:#08080a;font-weight:600;padding:10px 16px;font-size:13.5px;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:hover{filter:brightness(1.07)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--ink-3);filter:none}
+  .btn.sm{padding:7px 12px;font-size:12.5px}
+
+  /* headline cards */
+  .cards{display:grid;gap:9px;margin-top:12px}
+  .card{
+    text-align:left;background:var(--ink);border:1px solid var(--line);border-radius:9px;
+    padding:12px 14px;color:var(--text);width:100%;display:block;transition:.15s;
+  }
+  .card:hover{border-color:#4a4740;background:var(--ink-3)}
+  .card[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .tag{
+    font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--signal);
+    font-weight:600;display:block;margin-bottom:5px;
+  }
+  .card p{margin:0;font-family:Anton,Impact,sans-serif;font-size:17px;line-height:1.2;text-transform:uppercase;letter-spacing:.005em}
+  .card small{color:var(--muted);display:block;margin-top:6px;font-size:11.5px}
+
+  /* dropzone */
+  .drop{
+    border:1.5px dashed var(--line);border-radius:10px;padding:22px;text-align:center;
+    color:var(--muted);cursor:pointer;transition:.15s;background:var(--ink);
+  }
+  .drop:hover,.drop.over{border-color:var(--signal);color:var(--text);background:var(--ink-3)}
+  .drop b{color:var(--text);display:block;font-size:13.5px;margin-bottom:3px}
+
+  .freegen{
+    border:1px solid var(--line);border-top:2px solid var(--signal);border-radius:10px;
+    background:var(--ink);padding:14px;margin-top:14px;
+  }
+  .freegen-head{font-size:12px;font-weight:600;margin-bottom:10px}
+  .shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:12px}
+  .shots button{padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:none;line-height:0}
+  .shots button[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .shots img{width:100%;display:block;aspect-ratio:1;object-fit:cover}
+  .promptbox{
+    background:var(--ink);border:1px solid var(--line);border-left:3px solid var(--signal);
+    border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:#cdd6e2;
+    white-space:pre-wrap;margin-top:12px;
+  }
+  .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .links a{
+    font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    padding:6px 10px;border-radius:99px;
+  }
+  .links a:hover{color:var(--text);border-color:#4a4740}
+
+  /* template + size pickers */
+  .picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+  .pick{
+    background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px;color:var(--text);
+    display:flex;flex-direction:column;gap:7px;align-items:stretch;transition:.15s;
+  }
+  .pick:hover{border-color:#4a4740}
+  .pick[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .pick canvas{width:100%;border-radius:5px;display:block;background:var(--ink-3)}
+  .pick span{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.3}
+  .pick[aria-pressed="true"] span{color:var(--text)}
+
+  .sizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .size{
+    background:var(--ink);border:1px solid var(--line);border-radius:9px;padding:14px;color:var(--text);
+    display:flex;align-items:center;gap:12px;transition:.15s;
+  }
+  .size:hover{border-color:#4a4740}
+  .size[aria-pressed="true"]{border-color:var(--signal);box-shadow:inset 0 0 0 1px var(--signal)}
+  .glyph{border:2px solid var(--muted);border-radius:3px;flex:none}
+  .size[aria-pressed="true"] .glyph{border-color:var(--signal)}
+  .size b{display:block;font-size:13px}
+  .size small{color:var(--muted);font-size:11.5px}
+
+  /* fine tune */
+  .tune{display:grid;grid-template-columns:auto 1fr;gap:9px 12px;align-items:center;margin-top:12px}
+  .tune label{font-size:12px;color:var(--muted)}
+  input[type=range]{width:100%;accent-color:var(--signal)}
+  .check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .check input{accent-color:var(--signal);width:15px;height:15px}
+
+  /* stage */
+  .stage h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
+  .canvas-hold{
+    background:
+      linear-gradient(45deg,#161618 25%,transparent 25%,transparent 75%,#161618 75%),
+      linear-gradient(45deg,#161618 25%,#0e0e10 25%,#0e0e10 75%,#161618 75%);
+    background-size:18px 18px;background-position:0 0,9px 9px;
+    border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;place-items:center;
+  }
+  #preview{max-width:100%;max-height:56vh;display:block;border-radius:3px;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+  @media (max-width:1040px){ #preview{max-height:70vh} }
+  .stage-foot{display:flex;gap:9px}
+  .stage-foot .btn{flex:1;justify-content:center}
+
+  .manual{border:1px solid var(--line);border-radius:9px;background:var(--ink);margin-top:14px}
+  .manual summary{
+    list-style:none;cursor:pointer;padding:11px 14px;font-size:12.5px;font-weight:600;
+    display:flex;align-items:center;gap:9px;
+  }
+  .manual summary::-webkit-details-marker{display:none}
+  .manual summary::before{content:'+';color:var(--signal);font-size:14px;line-height:1}
+  .manual[open] summary::before{content:'\2212'}
+  .manual-tag{
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--signal);
+    border:1px solid rgba(250,200,2,.4);border-radius:99px;padding:2px 8px;font-weight:600;
+  }
+  .manual-body{padding:0 14px 14px}
+  .note{color:var(--muted);font-size:12px;line-height:1.6}
+  .err{color:#ff8b98;font-size:12.5px;margin-top:10px;line-height:1.5}
+  .spin{width:13px;height:13px;border:2px solid rgba(0,0,0,.25);border-top-color:#111;border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+  :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  hr.sep{border:0;border-top:1px solid var(--line);margin:14px 0}
+</style>
+
+<header>
+  <img class="mark" src="data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%2308080a%22 stroke=%22%23fac802%22 stroke-width=%224%22/><text x=%2250%22 y=%2266%22 font-family=%22Arial, sans-serif%22 font-weight=%22900%22 font-size=%2252%22 fill=%22%23fac802%22 text-anchor=%22middle%22>S</text></svg>" alt="Udari Lifestyle">
+  <div style="flex:1;min-width:0">
+    <h1>Udari Lifestyle <span>Post Creator</span></h1>
+    <p>News description → headline → image → Facebook post</p>
+  </div>
+  <button class="btn ghost sm" id="reset">Start over</button>
+</header>
+
+<div class="wrap">
+<main class="flow">
+
+  <!-- 1 -->
+  <section class="step" id="s1" data-open="1">
+    <div class="step-head"><div class="num">1</div><div class="step-title">News description<span class="step-sub" id="sub1">Paste the story</span></div><div class="chev">▾</div></div>
+    <div class="step-body">
+      <label class="lbl" for="desc">Paste the news text. Any language — headlines come back in the same one.</label>
+      <textarea id="desc" placeholder="Exemple : Le gouvernement étudie une réforme des avantages accordés à vie aux anciens présidents de la République : voiture avec chauffeur, protection policière, bureau et collaborateurs financés par l'État…"></textarea>
+      <div class="row" style="margin-top:11px">
+        <button class="btn" id="gen-heads" style="flex:0 0 auto">Write 4 headlines</button>
+        <button class="btn ghost sm" id="skip-ai" style="flex:0 0 auto">Skip — I'll write my own</button>
+      </div>
+      <div class="err" id="err1" hidden></div>
+
+      <details class="manual" id="manual">
+        <summary>Or use any chat — Claude, ChatGPT, Gemini <span class="manual-tag">free, no key</span></summary>
+        <div class="manual-body">
+          <p class="note">Copy the instruction below, paste it into a chat, then bring the four lines back here. Costs nothing and works from any account.</p>
+
+          <label class="lbl" style="margin-top:12px" for="manual-prompt">1 — copy this</label>
+          <textarea id="manual-prompt" readonly style="min-height:110px;font-size:12px"></textarea>
+          <div class="row" style="margin-top:9px">
+            <button class="btn ghost sm" id="copy-manual" style="flex:0 0 auto">Copy instruction</button>
+            <a class="btn ghost sm" href="https://claude.ai/new" target="_blank" rel="noopener" style="flex:0 0 auto;text-decoration:none;display:inline-flex;align-items:center">Open Claude</a>
+          </div>
+
+          <label class="lbl" style="margin-top:14px" for="manual-paste">2 — paste what it wrote</label>
+          <textarea id="manual-paste" style="min-height:90px" placeholder="Paste the four headlines here. Numbering, bullets and quotes are fine — they get cleaned up."></textarea>
+          <button class="btn" id="use-manual" style="margin-top:10px">Use these headlines</button>
+          <div class="err" id="err-manual" hidden></div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" id="s2" data-locked="1">
+    <div class="step-head"><div class="num">2</div><div class="step-title">Pick a headline<span class="step-sub" id="sub2">4 angles</span></div><div class="chev">▾</div></div>
+    <div class="step-body">
+      <p class="note">Written for a 45–80 audience: plain words, a clear stake, something worth arguing about in the comments.</p>
+      <div class="cards" id="cards"></div>
+      <button class="btn ghost sm" id="regen" style="margin-top:11px">Write 4 more</button>
+      <hr class="sep">
+      <label class="lbl" for="hl-text">Headline on the post (edit freely)</label>
+      <textarea id="hl-text" style="min-height:70px"></textarea>
+
+      <label class="lbl" style="margin-top:12px" for="hl-hi">Words in yellow <span style="opacity:.6">— comma separated, add as many as you like</span></label>
+      <input type="text" id="hl-hi" placeholder="e.g. AVANTAGES À VIE, RÉFORME, ÉTAT">
+
+      <label class="lbl" style="margin-top:10px" for="hl-hi2">Words in red <span style="opacity:.6">— comma separated, add as many as you like</span></label>
+      <input type="text" id="hl-hi2" placeholder="e.g. PRISON, INTERDIT, SCANDALE">
+
+      <div class="row" style="margin-top:12px">
+        <div style="flex:0 0 140px;min-width:120px">
+          <label class="lbl" for="lbl-yes">Thumb label (YES)</label>
+          <input type="text" id="lbl-yes" value="OUI">
+        </div>
+        <div style="flex:0 0 140px;min-width:120px">
+          <label class="lbl" for="lbl-no">Heart label (NO)</label>
+          <input type="text" id="lbl-no" value="NON">
+        </div>
+      </div>
+      <button class="btn" id="to-img" style="margin-top:12px">Next: the picture</button>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" id="s3" data-locked="1">
+    <div class="step-head"><div class="num">3</div><div class="step-title">The picture<span class="step-sub" id="sub3">Generate a brief, drop the image in</span></div><div class="chev">▾</div></div>
+    <div class="step-body">
+      <p class="note">Claude writes the brief, then generates the photo from it — free, no account, no key. You can also paste the brief into your own generator, or drop in a picture you already have.</p>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="gen-prompt" style="flex:0 0 auto">Write the image brief</button>
+        <button class="btn ghost sm" id="copy-prompt" style="flex:0 0 auto" disabled>Copy brief</button>
+      </div>
+      <label class="lbl" style="margin-top:12px" for="promptbox">Image brief — edit before generating</label>
+      <textarea id="promptbox" style="min-height:100px" placeholder="Press Write the image brief, or describe the photo yourself."></textarea>
+
+      <details class="manual" id="manual3">
+        <summary>Or write the brief in any chat <span class="manual-tag">free, no key</span></summary>
+        <div class="manual-body">
+          <p class="note">Same idea as step 1. Copy the instruction, paste it into a chat, bring the paragraph back.</p>
+          <label class="lbl" style="margin-top:12px" for="brief-prompt">1 — copy this</label>
+          <textarea id="brief-prompt" readonly style="min-height:110px;font-size:12px"></textarea>
+          <div class="row" style="margin-top:9px">
+            <button class="btn ghost sm" id="copy-brief-prompt" style="flex:0 0 auto">Copy instruction</button>
+            <a class="btn ghost sm" href="https://claude.ai/new" target="_blank" rel="noopener" style="flex:0 0 auto;text-decoration:none;display:inline-flex;align-items:center">Open Claude</a>
+          </div>
+          <label class="lbl" style="margin-top:14px" for="brief-paste">2 — paste the paragraph</label>
+          <textarea id="brief-paste" style="min-height:80px" placeholder="Paste the image brief it wrote."></textarea>
+          <button class="btn" id="use-brief" style="margin-top:10px">Use this brief</button>
+          <div class="err" id="err-brief" hidden></div>
+        </div>
+      </details>
+
+      <div class="freegen">
+        <div class="freegen-head">Generate the photo — free, no key</div>
+        <div class="row" style="align-items:center">
+          <button class="btn" id="gen-image" style="flex:0 0 auto">Generate the photo</button>
+          <select id="gstyle" style="flex:0 0 140px">
+            <option value="flux">Realistic photo</option>
+            <option value="turbo">Faster, rougher</option>
+          </select>
+          <select id="gdetail" style="flex:0 0 150px">
+            <option value="sharp">Sharper, slower</option>
+            <option value="standard">Standard, quicker</option>
+          </select>
+          <span class="note" style="flex:1 1 180px">Runs on Pollinations, a free public service. 10–30 seconds. Busy at times.</span>
+        </div>
+        <p class="note" id="gen-status" hidden style="margin:10px 0 0"></p>
+        <div class="err" id="err-gen" hidden></div>
+        <div class="shots" id="shots" hidden></div>
+        <div class="row" id="save-row" hidden style="margin-top:12px;align-items:center">
+          <button class="btn ghost sm" id="save-jpg" style="flex:0 0 auto">Save photo as JPG</button>
+          <button class="btn ghost sm" id="save-png" style="flex:0 0 auto">Save as PNG</button>
+          <span class="note" style="flex:1 1 200px">Saves the picture on its own, ready to upload back in.</span>
+        </div>
+        <p class="note" id="save-note" hidden style="margin:9px 0 0"></p>
+      </div>
+
+      <div class="links" id="genlinks" hidden>
+        <a href="https://gemini.google.com/" target="_blank" rel="noopener">Gemini</a>
+        <a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>
+        <a href="https://unsplash.com/" target="_blank" rel="noopener">Unsplash (stock)</a>
+      </div>
+
+      <hr class="sep">
+      <div class="drop" id="drop">
+        <b>Drop a picture here</b>
+        JPG, PNG, WebP, GIF, AVIF, BMP, SVG — or an MP4, and a frame gets taken from it
+      </div>
+      <input type="file" id="file" accept="image/*,video/*,.svg,.avif,.bmp,.heic" hidden>
+      <div class="tune" id="tune" hidden>
+        <label for="zoom">Zoom</label><input type="range" id="zoom" min="100" max="260" value="100">
+        <label for="ox">Left · right</label><input type="range" id="ox" min="-50" max="50" value="0">
+        <label for="oy">Up · down</label><input type="range" id="oy" min="-50" max="50" value="0">
+      </div>
+      <button class="btn" id="to-tpl" style="margin-top:12px" disabled>Next: template</button>
+      <div class="err" id="err3" hidden></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" id="s4" data-locked="1">
+    <div class="step-head"><div class="num">4</div><div class="step-title">Template<span class="step-sub" id="sub4">8 layouts</span></div><div class="chev">▾</div></div>
+    <div class="step-body">
+      <div class="picks" id="picks"></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:13px">
+        <label class="check"><input type="checkbox" id="show-react" checked> Reaction row</label>
+        <label class="check"><input type="checkbox" id="emoji-icons"> Emoji instead of badges</label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div>
+          <label class="lbl" for="badge">Badge / kicker <span style="opacity:.6">— B, D, F</span></label>
+          <input type="text" id="badge" value="DÉBAT" placeholder="DÉBAT">
+        </div>
+        <div>
+          <label class="lbl" for="subtitle">Strapline <span style="opacity:.6">— D</span></label>
+          <input type="text" id="subtitle" value="Décryptage, chiffres et analyse" placeholder="Décryptage, chiffres et analyse">
+        </div>
+        <div>
+          <label class="lbl" for="brand">Page name <span style="opacity:.6">— E, G</span></label>
+          <input type="text" id="brand" placeholder="Life in Australia">
+        </div>
+      </div>
+      <button class="btn" id="to-size" style="margin-top:13px">Next: size</button>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" id="s5" data-locked="1">
+    <div class="step-head"><div class="num">5</div><div class="step-title">Size<span class="step-sub" id="sub5">Feed format</span></div><div class="chev">▾</div></div>
+    <div class="step-body">
+      <div class="sizes">
+        <button class="size" data-size="1:1" aria-pressed="true">
+          <span class="glyph" style="width:34px;height:34px"></span>
+          <span><b>1:1 square</b><small>1080 × 1080 · exports 2160 px</small></span>
+        </button>
+        <button class="size" data-size="4:5" aria-pressed="false">
+          <span class="glyph" style="width:29px;height:36px"></span>
+          <span><b>4:5 portrait</b><small>1080 × 1350 · exports 2160 × 2700</small></span>
+        </button>
+        <button class="size" data-size="3:4" aria-pressed="false">
+          <span class="glyph" style="width:27px;height:36px"></span>
+          <span><b>3:4 portrait</b><small>1080 × 1440 · exports 2160 × 2880</small></span>
+        </button>
+      </div>
+      <p class="note" style="margin-top:12px">Portrait takes more room in the feed. Square is safer if the caption matters more than the picture. 4:5 is the tallest Facebook will show at full size without cropping in the feed.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- preview -->
+<aside class="stage">
+  <h2>Preview</h2>
+  <div class="canvas-hold"><canvas id="preview" width="1080" height="1080"></canvas></div>
+  <div class="stage-foot">
+    <button class="btn" id="download" disabled>Download PNG</button>
+    <button class="btn ghost" id="download-jpg" disabled>JPG</button>
+  </div>
+  <p class="note" id="export-fallback" hidden style="margin-top:2px"></p>
+  <p class="note" id="stagenote">Add a headline and an image to see the post build itself.</p>
+</aside>
+</div>
+
+<script>
+/* ============================================================
+   state
+   ============================================================ */
+const S = {
+  desc:'', headlines:[], pick:-1,
+  headline:'', highlight:'', highlight2:'', yes:'OUI', no:'NON',
+  prompt:'', img:null, zoom:1, ox:0, oy:0,
+  tpl:'A', size:'1:1',
+  react:true, emoji:false, badge:'DÉBAT',
+  subtitle:'Décryptage, chiffres et analyse', brand:''
+};
+
+const DIMS = { '1:1':[1080,1080], '4:5':[1080,1350], '3:4':[1080,1440] };
+const DISPLAY = "Anton, Impact, 'Arial Narrow', sans-serif";
+const HEAVY   = "Inter, Helvetica, Arial, sans-serif";   // for sentence-case headlines
+const HR_BLUE = '#012169';
+const HR_RED = '#C8102E';
+const $ = s => document.querySelector(s);
+
+/* ============================================================
+   drawing helpers
+   ============================================================ */
+function drawHrRule(ctx, x, y, w, h){
+  ctx.fillStyle = HR_BLUE; ctx.fillRect(x, y, w/2, h);
+  ctx.fillStyle = HR_RED; ctx.fillRect(x + w/2, y, w/2, h);
+}
+
+function cover(ctx, img, x, y, w, h, zoom, ox, oy){
+  const s = Math.max(w/img.width, h/img.height) * zoom;
+  const dw = img.width*s, dh = img.height*s;
+  const dx = x + (w-dw)/2 + ox*(dw-w)/2;
+  const dy = y + (h-dh)/2 + oy*(dh-h)/2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+
+function placeholder(ctx, w, h){
+  const g = ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,'#2b3543'); g.addColorStop(1,'#161c25');
+  ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle = 'rgba(255,255,255,.20)';
+  ctx.font = `${Math.round(w*0.028)}px Inter, sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('your image goes here', w/2, h*0.30);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+
+/* words → tokens, marking yellow / red runs. Both hi and hi2 accept
+   comma-separated phrases so several different words or phrases can be
+   coloured independently — e.g. "AVANTAGES, RÉFORME, ÉTAT". */
+function tokenize(text, hi, hi2){
+  const words = (text||'').trim().split(/\s+/).filter(Boolean);
+  const out = words.map(w=>({w, color:null}));
+  const norm = s => s.toUpperCase().replace(/[^\p{L}\p{N}]/gu,'');
+  const nw = words.map(norm);
+  const markAll = (raw, color) => {
+    (raw||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(phrase=>{
+      const hw = phrase.split(/\s+/).map(norm).filter(Boolean);
+      if(!hw.length) return;
+      outer: for(let i=0;i<=nw.length-hw.length;i++){
+        for(let j=0;j<hw.length;j++) if(nw[i+j]!==hw[j]) continue outer;
+        for(let j=0;j<hw.length;j++) out[i+j].color = color;
+      }
+    });
+  };
+  markAll(hi, 'yellow');
+  markAll(hi2, 'red');
+  return out;
+}
+
+function wrap(ctx, tokens, maxW){
+  const sp = ctx.measureText(' ').width;
+  const lines = []; let line = [], lw = 0;
+  for(const t of tokens){
+    const w = ctx.measureText(t.w).width;
+    if(w > maxW) return null;
+    if(line.length && lw + sp + w > maxW){ lines.push({toks:line, w:lw}); line=[t]; lw=w; }
+    else { lw += (line.length? sp:0) + w; line.push(t); }
+  }
+  if(line.length) lines.push({toks:line, w:lw});
+  return lines;
+}
+
+/* find the biggest size that fits the box */
+function faceOf(face){ return face || {family:DISPLAY, weight:''}; }
+function setFace(ctx, face, size){
+  const f = faceOf(face);
+  ctx.font = `${f.weight ? f.weight + ' ' : ''}${size}px ${f.family}`;
+}
+
+function fit(ctx, tokens, maxW, maxH, maxSize, lh, tracking, face){
+  let size = Math.floor(maxSize);
+  while(size > 10){
+    ctx.letterSpacing = tracking;
+    setFace(ctx, face, size);
+    const lines = wrap(ctx, tokens, maxW);
+    if(lines && lines.length*size*lh <= maxH) return {size, lines, lh, face};
+    size = Math.floor(size*0.96);
+  }
+  setFace(ctx, face, size);
+  return {size, lines: wrap(ctx, tokens, maxW) || [{toks:tokens, w:maxW}], lh, face};
+}
+
+/* base = normal word colour. colors = {yellow:'#...', red:'#...'} — a token
+   paints in colors[t.color] when it belongs to a highlighted run. */
+function drawLines(ctx, L, x, y, align, base, colors){
+  ctx.textBaseline = 'top';
+  setFace(ctx, L.face, L.size);
+  const sp = ctx.measureText(' ').width;
+  L.lines.forEach((ln, i)=>{
+    let cx = align==='center' ? x - ln.w/2 : x;
+    const cy = y + i*L.size*L.lh;
+    ln.toks.forEach((t, k)=>{
+      ctx.fillStyle = t.color ? ((colors && colors[t.color]) || base) : base;
+      ctx.fillText(t.w, cx, cy);
+      cx += ctx.measureText(t.w).width + (k<ln.toks.length-1 ? sp : 0);
+    });
+  });
+  ctx.textBaseline = 'alphabetic';
+}
+const blockH = L => L.lines.length * L.size * L.lh;
+
+/* icons */
+function heart(ctx, cx, cy, s, color){
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s/100, s/100); ctx.translate(-50,-50);
+  ctx.fillStyle = color; ctx.beginPath();
+  ctx.moveTo(50, 86);
+  ctx.bezierCurveTo(12, 62, 6, 40, 18, 26);
+  ctx.bezierCurveTo(30, 12, 46, 18, 50, 32);
+  ctx.bezierCurveTo(54, 18, 70, 12, 82, 26);
+  ctx.bezierCurveTo(94, 40, 88, 62, 50, 86);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function thumb(ctx, cx, cy, s, color){
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s/100, s/100); ctx.translate(-50,-52);
+  ctx.fillStyle = color;
+  // sleeve
+  ctx.beginPath(); ctx.roundRect(10, 48, 20, 42, 4); ctx.fill();
+  // hand + thumb
+  ctx.beginPath();
+  ctx.moveTo(36, 90);
+  ctx.lineTo(36, 56);
+  ctx.bezierCurveTo(36, 52, 40, 50, 43, 46);
+  ctx.bezierCurveTo(48, 38, 47, 28, 50, 20);
+  ctx.bezierCurveTo(52, 14, 62, 15, 62, 24);
+  ctx.bezierCurveTo(62, 32, 58, 38, 57, 44);
+  ctx.lineTo(80, 44);
+  ctx.bezierCurveTo(87, 44, 89, 52, 83, 55);
+  ctx.bezierCurveTo(89, 58, 88, 66, 82, 68);
+  ctx.bezierCurveTo(87, 71, 86, 79, 80, 81);
+  ctx.bezierCurveTo(84, 84, 82, 90, 76, 90);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+
+/* a pill of text on a solid block — kickers, badges, brand tags new*/
+function pill(ctx, text, x, y, W, opts){
+  const {size, bg, fg = '#fff', radius = 0, align = 'left', tracking = '0.02em', pad = 0.55, face} = opts;
+  ctx.letterSpacing = tracking;
+  setFace(ctx, face || {family:DISPLAY}, size);
+  const tw = ctx.measureText(text).width;
+  const ph = size * pad, pv = size * 0.34;
+  const bw = tw + ph * 2, bh = size + pv * 2;
+  const bx = align === 'center' ? x - bw / 2 : x;
+  ctx.fillStyle = bg;
+  if(radius){ ctx.beginPath(); ctx.roundRect(bx, y, bw, bh, radius); ctx.fill(); }
+  else ctx.fillRect(bx, y, bw, bh);
+  ctx.fillStyle = fg; ctx.textBaseline = 'top';
+  ctx.fillText(text, bx + ph, y + pv - size * 0.06);
+  ctx.textBaseline = 'alphabetic';
+  ctx.letterSpacing = '0px';
+  return {w:bw, h:bh};
+}
+
+/* small calendar glyph for the question-of-the-day badge */
+function calendarIcon(ctx, x, y, s, color){
+  ctx.save(); ctx.translate(x, y); ctx.scale(s/100, s/100);
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.roundRect(8, 18, 84, 74, 10); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+  ctx.beginPath(); ctx.roundRect(4, 2, 14, 26, 6); ctx.fill();
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.roundRect(22, 0, 14, 28, 6); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(64, 0, 14, 28, 6); ctx.fill();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillRect(18, 38, 64, 8);
+  [0,1,2].forEach(r => [0,1,2].forEach(c => ctx.fillRect(22 + c*22, 54 + r*13, 12, 8)));
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.restore();
+}
+
+/* YES ... NO pushed to opposite edges, label first */
+function spreadReactions(ctx, y, W, st, pad){
+  const icon = W * 0.075, font = Math.round(W * 0.062);
+  ctx.letterSpacing = '0px';
+  setFace(ctx, {family:DISPLAY}, font);
+  ctx.textBaseline = 'middle';
+  const A = (st.yes || 'YES').toUpperCase(), B = (st.no || 'NO').toUpperCase();
+
+  ctx.fillStyle = '#fff';
+  ctx.fillText(A, pad, y);
+  const aw = ctx.measureText(A).width;
+  ctx.fillStyle = '#2b6fdb';
+  ctx.beginPath(); ctx.arc(pad + aw + W*0.028 + icon/2, y, icon/2, 0, Math.PI*2); ctx.fill();
+  thumb(ctx, pad + aw + W*0.028 + icon/2, y, icon*0.60, '#fff');
+
+  const bw = ctx.measureText(B).width;
+  const right = W - pad;
+  ctx.fillStyle = '#e0233a';
+  ctx.beginPath(); ctx.arc(right - icon/2, y, icon/2, 0, Math.PI*2); ctx.fill();
+  heart(ctx, right - icon/2, y, icon*0.55, '#fff');
+  ctx.fillStyle = '#fff';
+  ctx.fillText(B, right - icon - W*0.028 - bw, y);
+  ctx.textBaseline = 'alphabetic';
+}
+
+/* one reaction row, returns nothing.
+   YES = thumbs up (blue), NO = heart (red) — matches Facebook's own
+   reaction glyphs so the row reads instantly. */
+function reactionRow(ctx, cx, y, W, st, style){
+  const icon = W*0.052;
+  const font = Math.round(W*0.055);
+  ctx.letterSpacing = '0px';
+  ctx.font = `${font}px ${DISPLAY}`;
+  const A = (st.yes||'OUI').toUpperCase(), B = (st.no||'NON').toUpperCase();
+  const gap = W*0.028, pad = W*0.055;
+  const wA = ctx.measureText(A).width, wB = ctx.measureText(B).width;
+  const badge = style==='badge' ? icon*1.42 : icon*1.15;
+  const total = badge + gap + wA + pad*2 + badge + gap + wB;
+  let x = cx - total/2;
+  ctx.textBaseline = 'middle';
+
+  const item = (label, w, kind)=>{
+    if(style==='badge'){
+      ctx.fillStyle = kind==='heart' ? '#e0233a' : '#2b6fdb';
+      ctx.beginPath(); ctx.arc(x + badge/2, y, badge/2, 0, Math.PI*2); ctx.fill();
+      if(kind==='heart') heart(ctx, x+badge/2, y, icon*0.72, '#fff');
+      else thumb(ctx, x+badge/2, y, icon*0.80, '#fff');
+    } else {
+      ctx.font = `${icon}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+      ctx.fillText(kind==='heart' ? '❤️' : '👍', x, y);
+      ctx.font = `${font}px ${DISPLAY}`;
+    }
+    x += badge + gap;
+    ctx.fillStyle = '#fff';
+    ctx.font = `${font}px ${DISPLAY}`;
+    ctx.fillText(label, x, y + font*0.03);
+    x += w;
+  };
+
+  item(A, wA, 'thumb');
+  const dx = x + pad;
+  ctx.strokeStyle = 'rgba(255,255,255,.42)'; ctx.lineWidth = Math.max(1, W*0.0022);
+  ctx.beginPath(); ctx.moveTo(dx, y - font*0.62); ctx.lineTo(dx, y + font*0.62); ctx.stroke();
+  x += pad*2;
+  item(B, wB, 'heart');
+  ctx.textBaseline = 'alphabetic';
+}
+
+/* ============================================================
+   the three templates
+   ============================================================ */
+function drawA(ctx, W, H, st){                 // navy panel + tricolor + poll
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const pH = H * (H>W ? 0.40 : 0.45);
+  const pT = H - pH;
+  const g = ctx.createLinearGradient(0, pT - H*0.09, 0, pT + H*0.02);
+  g.addColorStop(0,'rgba(11,22,45,0)'); g.addColorStop(1,'#0b162d');
+  ctx.fillStyle = g; ctx.fillRect(0, pT - H*0.09, W, H*0.11);
+  ctx.fillStyle = '#0b162d'; ctx.fillRect(0, pT, W, pH);
+
+  const padX = W*0.055;
+  const boxW = W - padX*2;
+  const textTop = pT + pH*0.09;
+  const textH = pH * (st.react ? 0.50 : 0.78);
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), boxW, textH, W*0.115, 0.92, '-0.01em');
+  drawLines(ctx, L, W/2, textTop + (textH - blockH(L))/2, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+
+  if(st.react){
+    const barY = pT + pH*0.685, barW = W*0.70, barH = Math.max(3, H*0.0055), bx = (W-barW)/2;
+    drawHrRule(ctx, bx, barY, barW, barH);
+    reactionRow(ctx, W/2, pT + pH*0.855, W, st, st.emoji ? 'emoji' : 'badge');
+  }
+  ctx.letterSpacing = '0px';
+}
+
+function drawB(ctx, W, H, st){                 // full bleed + UK flag bar + poll + DÉBAT badge
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const g = ctx.createLinearGradient(0, H*0.30, 0, H);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.45,'rgba(0,0,0,.62)'); g.addColorStop(1,'rgba(0,0,0,.90)');
+  ctx.fillStyle = g; ctx.fillRect(0, H*0.30, W, H*0.70);
+
+  const padX = W*0.055, boxW = W - padX*2;
+  const bottom = H - H*0.055;
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), boxW, H*0.40, W*0.105, 0.90, '-0.012em');
+  let y = bottom - blockH(L);
+
+  if(st.react){
+    y -= H*0.175;                                             // room for the flag bar + reaction row
+    const barW = W*0.62, barH = Math.max(3, H*0.0052), bx = (W-barW)/2;
+    const barY = bottom - H*0.105;
+    drawHrRule(ctx, bx, barY, barW, barH);
+    reactionRow(ctx, W/2, bottom - H*0.040, W, st, st.emoji ? 'emoji' : 'badge');
+  }
+  ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = W*0.014; ctx.shadowOffsetY = W*0.004;
+  drawLines(ctx, L, W/2, y, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  const label = (st.badge||'').trim().toUpperCase();
+  if(label){
+    const bf = Math.round(W*0.038);
+    ctx.letterSpacing = '0.02em';
+    ctx.font = `${bf}px ${DISPLAY}`;
+    const tw = ctx.measureText(label).width, ph = bf*0.52, pv = bf*0.30;
+    const bw = tw + ph*2, bh = bf + pv*2;
+    const bx = W/2 - bw/2, by = y - bh - H*0.028;
+    ctx.fillStyle = '#e0233a'; ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, W*0.006); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'top';
+    ctx.fillText(label, bx + ph, by + pv - bf*0.06);
+    ctx.textBaseline = 'alphabetic';
+  }
+  ctx.letterSpacing = '0px';
+}
+
+function drawC(ctx, W, H, st){                 // yellow frame + left-aligned
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const g = ctx.createLinearGradient(0, H*0.34, 0, H);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.40,'rgba(0,0,0,.66)'); g.addColorStop(1,'rgba(0,0,0,.93)');
+  ctx.fillStyle = g; ctx.fillRect(0, H*0.34, W, H*0.66);
+  const s = ctx.createLinearGradient(0,0,W*0.75,0);
+  s.addColorStop(0,'rgba(0,0,0,.42)'); s.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = s; ctx.fillRect(0, H*0.34, W*0.75, H*0.66);
+
+  const padX = W*0.058;
+  const boxW = W*0.80;
+  const bottom = H - H*0.055;
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), boxW, H*0.44, W*0.10, 0.93, '-0.005em');
+  let y = bottom - blockH(L);
+
+  if(st.react){
+    const icon = W*0.048, font = Math.round(W*0.048);
+    const rowY = bottom - font*0.5;
+    let x = padX;
+    ctx.textBaseline = 'middle'; ctx.letterSpacing = '0px';
+    const one = (emo, label, col) => {
+      if(st.emoji){
+        ctx.font = `${icon}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+        ctx.fillStyle = '#fff'; ctx.fillText(emo, x, rowY); x += icon*1.30;
+      } else {
+        if(emo==='❤️') heart(ctx, x + icon/2, rowY, icon*0.95, '#e0233a');
+        else thumb(ctx, x + icon/2, rowY, icon, '#f5c518');
+        x += icon*1.36;
+      }
+      ctx.font = `${font}px ${DISPLAY}`; ctx.fillStyle = '#fff';
+      ctx.fillText(label.toUpperCase(), x, rowY + font*0.03);
+      x += ctx.measureText(label.toUpperCase()).width;
+    };
+    one('👍', st.no || 'NON');
+    const dx = x + W*0.05;
+    ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=Math.max(1,W*0.002);
+    ctx.beginPath(); ctx.moveTo(dx, rowY-font*0.62); ctx.lineTo(dx, rowY+font*0.62); ctx.stroke();
+    x += W*0.10;
+    one('❤️', st.yes || 'OUI');
+    ctx.textBaseline = 'alphabetic';
+    y -= font*2.6;
+  }
+  drawLines(ctx, L, padX, y, 'left', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+
+  const fw = Math.max(4, W*0.0115);
+  ctx.strokeStyle = '#f5c518'; ctx.lineWidth = fw;
+  ctx.strokeRect(fw/2, fw/2, W-fw, H-fw);
+  ctx.letterSpacing = '0px';
+}
+
+
+/* ---- D: question of the day — sentence case, badge, gold rule, strapline ---- */
+function drawD(ctx, W, H, st){
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const g = ctx.createLinearGradient(0, H*0.34, 0, H);
+  g.addColorStop(0,'rgba(6,12,26,0)'); g.addColorStop(0.45,'rgba(6,12,26,.72)'); g.addColorStop(1,'rgba(6,12,26,.96)');
+  ctx.fillStyle = g; ctx.fillRect(0, H*0.34, W, H*0.66);
+
+  const padX = W*0.055;
+  const bottom = H - H*0.045;
+  let y = bottom;
+
+  // strapline
+  const sub = (st.subtitle || '').trim();
+  if(sub){
+    const sf = Math.round(W*0.031);
+    ctx.letterSpacing = '0.01em';
+    setFace(ctx, {family:HEAVY, weight:'500'}, sf);
+    ctx.fillStyle = '#e6ecf5'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(sub, W/2, y);
+    const sw = ctx.measureText(sub).width;
+    ctx.lineWidth = Math.max(1, W*0.0018);
+    [[W/2 - sw/2 - W*0.10, W/2 - sw/2 - W*0.03, HR_BLUE],[W/2 + sw/2 + W*0.03, W/2 + sw/2 + W*0.10, HR_RED]]
+      .forEach(([x1,x2,color])=>{ ctx.strokeStyle = color; ctx.beginPath(); ctx.moveTo(x1, y - sf*0.32); ctx.lineTo(x2, y - sf*0.32); ctx.stroke(); });
+    ctx.textAlign = 'left';
+    y -= sf*1.9;
+  }
+
+  // two-colour separator rule
+  const rw = W - padX*2, rh = Math.max(2, H*0.0042);
+  drawHrRule(ctx, padX, y - rh, rw, rh);
+  y -= H*0.042;
+
+  // headline, sentence case on purpose
+  const L = fit(ctx, tokenize(st.headline, st.highlight, st.highlight2), W - padX*2, H*0.34, W*0.088, 1.08, '-0.02em', {family:HEAVY, weight:'800'});
+  y -= blockH(L);
+  drawLines(ctx, L, padX, y, 'left', '#ffffff', {yellow:'#f0b429', red:'#ff5a4d'});
+
+  // badge
+  const bs = Math.round(W*0.030);
+  const label = (st.badge || 'QUESTION DU JOUR').trim().toUpperCase();
+  if(label){
+    const bh = bs*1.68;
+    const by = y - H*0.028 - bh;
+    ctx.letterSpacing = '0.06em';
+    setFace(ctx, {family:HEAVY, weight:'700'}, bs);
+    const tw = ctx.measureText(label).width;
+    const icon = bs*1.15, gap = bs*0.62, ph = bs*0.85;
+    const bw = ph + icon + gap + tw + ph;
+    ctx.fillStyle = '#123f70';
+    ctx.beginPath(); ctx.roundRect(padX, by, bw, bh, bh*0.28); ctx.fill();
+    calendarIcon(ctx, padX + ph, by + (bh - icon)/2, icon, '#ffffff');
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, padX + ph + icon + gap, by + bh/2 + bs*0.04);
+    ctx.textBaseline = 'alphabetic';
+  }
+  ctx.letterSpacing = '0px';
+}
+
+/* ---- E: black caption bar under the picture ---- */
+function drawE(ctx, W, H, st){
+  const padX = W*0.045;
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), W - padX*2, H*0.34, W*0.062, 1.14, '0.01em');
+  const barH = blockH(L) + H*0.055;
+  const photoH = H - barH;
+
+  if(st.img) cover(ctx, st.img, 0, 0, W, photoH, st.zoom, st.ox, st.oy);
+  else { placeholder(ctx, W, photoH); }
+
+  ctx.fillStyle = '#000'; ctx.fillRect(0, photoH, W, barH);
+  drawLines(ctx, L, W/2, photoH + (barH - blockH(L))/2, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+
+  const brand = (st.brand || '').trim();
+  if(brand){
+    const bf = Math.round(W*0.026);
+    ctx.letterSpacing = '0.01em';
+    setFace(ctx, {family:HEAVY, weight:'600'}, bf);
+    ctx.fillStyle = 'rgba(255,255,255,.82)';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(brand, W - padX, photoH - H*0.022);
+    ctx.textAlign = 'left';
+  }
+  ctx.letterSpacing = '0px';
+}
+
+/* ---- F: coloured kicker block over a full-bleed photo ---- */
+function drawF(ctx, W, H, st){
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const g = ctx.createLinearGradient(0, H*0.42, 0, H);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.5,'rgba(0,0,0,.55)'); g.addColorStop(1,'rgba(0,0,0,.85)');
+  ctx.fillStyle = g; ctx.fillRect(0, H*0.42, W, H*0.58);
+
+  const padX = W*0.055;
+  const bottom = H - H*0.05;
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), W - padX*2, H*0.36, W*0.078, 1.05, '-0.005em');
+  let y = bottom - blockH(L);
+
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = W*0.012;
+  drawLines(ctx, L, W/2, y, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+  const label = (st.badge || '').trim().toUpperCase();
+  if(label){
+    const ks = Math.round(W*0.052);
+    ctx.letterSpacing = '0.01em';
+    setFace(ctx, {family:DISPLAY}, ks);
+    const bh = ks*1.66;
+    pill(ctx, label, padX, y - H*0.026 - bh, W, { size:ks, bg:'#f2711c', fg:'#fff', pad:0.42 });
+  }
+  ctx.letterSpacing = '0px';
+}
+
+/* ---- H: same as F (kicker over full-bleed photo), plus a UK flag bar
+   under the headline and a YES / NO reaction row at the very bottom ---- */
+function drawH(ctx, W, H, st){
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const g = ctx.createLinearGradient(0, H*0.38, 0, H);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.5,'rgba(0,0,0,.58)'); g.addColorStop(1,'rgba(0,0,0,.88)');
+  ctx.fillStyle = g; ctx.fillRect(0, H*0.38, W, H*0.62);
+
+  const padX = W*0.055;
+  const bottom = H - H*0.05;
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), W - padX*2, H*0.34, W*0.076, 1.05, '-0.005em');
+  let y = bottom - blockH(L);
+
+  if(st.react){
+    y -= H*0.175;                                             // room for the flag bar + reaction row
+    const barW = W*0.62, barH = Math.max(3, H*0.0052), bx = (W-barW)/2;
+    const barY = bottom - H*0.105;
+    drawHrRule(ctx, bx, barY, barW, barH);
+    reactionRow(ctx, W/2, bottom - H*0.040, W, st, st.emoji ? 'emoji' : 'badge');
+  }
+
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = W*0.012;
+  drawLines(ctx, L, W/2, y, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+  const label = (st.badge || '').trim().toUpperCase();
+  if(label){
+    const ks = Math.round(W*0.052);
+    ctx.letterSpacing = '0.01em';
+    setFace(ctx, {family:DISPLAY}, ks);
+    const bh = ks*1.66;
+    pill(ctx, label, padX, y - H*0.026 - bh, W, { size:ks, bg:'#f2711c', fg:'#fff', pad:0.42 });
+  }
+  ctx.letterSpacing = '0px';
+}
+
+/* ---- G: big YES / NO poll on a navy panel ---- */
+function drawG(ctx, W, H, st){
+  if(st.img) cover(ctx, st.img, 0,0,W,H, st.zoom, st.ox, st.oy); else placeholder(ctx,W,H);
+  const pH = H * (H > W ? 0.34 : 0.40);
+  const pT = H - pH;
+
+  ctx.fillStyle = '#0b1c3d'; ctx.fillRect(0, pT, W, pH);
+  ctx.fillStyle = '#e0233a'; ctx.fillRect(0, pT - Math.max(2, H*0.005), W, Math.max(2, H*0.005));
+
+  const brand = (st.brand || '').trim().toUpperCase();
+  if(brand){
+    const bs = Math.round(W*0.026);
+    ctx.letterSpacing = '0.04em';
+    setFace(ctx, {family:DISPLAY}, bs);
+    const tw = ctx.measureText(brand).width, ph = bs*0.7, pv = bs*0.42;
+    const bw = tw + ph*2, bh = bs + pv*2;
+    ctx.fillStyle = '#e0233a';
+    ctx.fillRect(W - W*0.035 - bw, pT - Math.max(2,H*0.005) - bh, bw, bh);
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'top';
+    ctx.fillText(brand, W - W*0.035 - bw + ph, pT - Math.max(2,H*0.005) - bh + pv - bs*0.06);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  const padX = W*0.045;
+  const textH = pH * (st.react ? 0.56 : 0.82);
+  const L = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), W - padX*2, textH, W*0.072, 1.06, '0em');
+  drawLines(ctx, L, W/2, pT + pH*0.10 + (textH - blockH(L))/2, 'center', '#ffffff', {yellow:'#f5c518', red:'#ff4d4d'});
+
+  if(st.react) spreadReactions(ctx, pT + pH*0.80, W, st, W*0.055);
+  ctx.letterSpacing = '0px';
+}
+
+const TPL = {
+  A:{name:'Poll panel',  hint:'Navy block + tricolor', draw:drawA},
+  B:{name:'Débat',       hint:'Full bleed + flag bar + poll', draw:drawB},
+  C:{name:'Yellow frame',hint:'Left aligned + border',  draw:drawC},
+  D:{name:'Question',    hint:'Badge + gold rule',       draw:drawD},
+  E:{name:'Caption bar', hint:'Photo above, black bar',  draw:drawE},
+  F:{name:'Kicker',      hint:'Orange label + big caps', draw:drawF},
+  G:{name:'Big poll',    hint:'YES / NO on navy',        draw:drawG},
+  H:{name:'Kicker + poll', hint:'Orange label + flag bar + poll', draw:drawH}
+};
+
+function render(canvas, w, h, st){
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#0b162d'; ctx.fillRect(0,0,w,h);
+  ctx.textAlign = 'left';
+  TPL[st.tpl].draw(ctx, w, h, st);
+}
+
+let fontsReady = false;
+function paint(){
+  const [w,h] = DIMS[S.size];
+  render($('#preview'), w, h, S);
+  paintThumbs();
+  const ready = S.headline.trim() && S.img;
+  $('#download').disabled = !ready;
+  $('#download-jpg').disabled = !ready;
+  $('#stagenote').textContent = ready
+    ? `${TPL[S.tpl].name} · ${S.size} · exports at ${w*2} × ${h*2} px`
+    : 'Add a headline and an image to see the post build itself.';
+}
+
+/* ============================================================
+   template thumbnails (live renders of the real thing)
+   ============================================================ */
+function buildPicks(){
+  const box = $('#picks'); box.innerHTML = '';
+  Object.entries(TPL).forEach(([k,t])=>{
+    const b = document.createElement('button');
+    b.className = 'pick'; b.dataset.tpl = k;
+    b.setAttribute('aria-pressed', S.tpl===k);
+    b.innerHTML = `<canvas></canvas><span><b style="display:block;color:inherit;font-size:12px">${t.name}</b>${t.hint}</span>`;
+    b.onclick = ()=>{ S.tpl = k; buildPicks(); paint(); };
+    box.appendChild(b);
+  });
+  paintThumbs();
+}
+function paintThumbs(){
+  document.querySelectorAll('.pick').forEach(p=>{
+    const c = p.querySelector('canvas');
+    const [w,h] = DIMS[S.size];
+    const tw = 320, th = Math.round(tw*h/w);
+    render(c, tw, th, {...S, tpl:p.dataset.tpl});
+    c.style.aspectRatio = `${w}/${h}`;
+    p.setAttribute('aria-pressed', S.tpl===p.dataset.tpl);
+  });
+}
+
+/* ============================================================
+   steps
+   ============================================================ */
+function open(id){
+  document.querySelectorAll('.step').forEach(s=> s.dataset.open = (s.id===id) ? '1':'0');
+  const el = document.getElementById(id);
+  if(el.scrollIntoView) try{ el.scrollIntoView({behavior:'smooth', block:'start'}); }catch{}
+}
+function unlock(id){ document.getElementById(id).dataset.locked = '0'; }
+function done(id, sub){
+  const s = document.getElementById(id);
+  s.dataset.done = '1';
+  if(sub) s.querySelector('.step-sub').textContent = sub;
+}
+document.querySelectorAll('.step-head').forEach(h=>{
+  h.onclick = ()=>{
+    const s = h.parentElement;
+    const isOpen = s.dataset.open === '1';
+    document.querySelectorAll('.step').forEach(x=> x.dataset.open='0');
+    s.dataset.open = isOpen ? '0' : '1';
+  };
+});
+
+/* ============================================================
+   Claude API
+   ============================================================ */
+const API = {
+  url:'https://api.anthropic.com/v1/messages',
+  models:['claude-sonnet-4-6','claude-sonnet-5','claude-haiku-4-5-20251001'],
+  model:null              // the first one that answered, reused after that
+};
+
+class ApiError extends Error{
+  constructor(msg, kind){ super(msg); this.kind = kind; }   // auth | model | network | busy | other
+}
+
+async function request(model, prompt, maxTokens){
+  const headers = {'Content-Type':'application/json'};
+  const ctl = new AbortController();
+  const timer = setTimeout(()=> ctl.abort(), 75000);
+  let res;
+  try{
+    res = await fetch(API.url, {
+      method:'POST', headers, signal: ctl.signal,
+      body: JSON.stringify({ model, max_tokens: maxTokens || 1000, messages:[{role:'user', content: prompt}] })
+    });
+  }catch(e){
+    throw new ApiError(e.name === 'AbortError' ? 'The request timed out.' : 'The browser could not reach api.anthropic.com.', 'network');
+  }finally{ clearTimeout(timer); }
+
+  if(!res.ok){
+    const body = await res.text().catch(()=> '');
+    let msg = `HTTP ${res.status}`;
+    try{ const j = JSON.parse(body); if(j?.error?.message) msg = j.error.message; }catch{}
+    if(res.status === 401 || res.status === 403) throw new ApiError(msg, 'auth');
+    if(res.status === 404 || /model/i.test(msg))  throw new ApiError(msg, 'model');
+    if(res.status === 429 || res.status >= 500)   throw new ApiError(msg, 'busy');
+    throw new ApiError(msg, 'other');
+  }
+  const data = await res.json();
+  const text = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+  if(!text) throw new ApiError('The model sent back an empty answer.', 'other');
+  return text;
+}
+
+async function ask(prompt, maxTokens){
+  const models = API.model ? [API.model, ...API.models.filter(m => m !== API.model)] : API.models;
+  let last;
+  for(const model of models){
+    for(let attempt = 0; attempt < 2; attempt++){
+      try{
+        const out = await request(model, prompt, maxTokens);
+        API.model = model;
+        return out;
+      }catch(e){
+        last = e;
+        if(e.kind === 'busy' && attempt === 0){ await sleep(1200); continue; }  // one retry
+        break;
+      }
+    }
+    if(last.kind !== 'model') break;   // only a rejected model name is worth trying the next one
+  }
+  throw last;
+}
+const sleep = ms => new Promise(r=> setTimeout(r, ms));
+
+/* turn an error into something the person can act on */
+function explain(e){
+  if(!(e instanceof ApiError)) return e.message || 'Something went wrong.';
+  if(e.kind === 'network') return 'Could not reach Claude. Check your connection and try again.';
+  if(e.kind === 'auth')    return 'Claude refused the request. Reload the page and try again.';
+  if(e.kind === 'busy')    return 'Claude is busy right now. Wait a few seconds and try again.';
+  if(e.kind === 'model')   return 'No model accepted the request: ' + e.message;
+  return e.message;
+}
+
+const STYLES = ['Question','Provocation','Conversational','Wry'];
+
+const HEADLINE_PROMPT = d => `Read this news story and write four headlines to go inside a Facebook image post.
+
+STORY:
+"""${d}"""
+
+AUDIENCE: 45 to 80 years old. What moves them: fairness and who is getting away with something; money, theirs and how public money is spent; respect for rules and for the people who follow them; being asked their opinion after years of not being asked. They read fast, on a phone, often without glasses.
+
+RULES
+- Write in the same language as the story.
+- 4 to 14 words each. Short punchy words, no jargon.
+- Must read at a glance in big capital letters. No quotation marks, no numbering inside the headline itself.
+- Do not invent anything that is not in the story.
+- Four genuinely different angles, in this order:
+  line 1 = a direct yes/no question the reader can answer with a reaction
+  line 2 = blunt, states the unfair or absurd side of the story
+  line 3 = conversational, like a neighbour saying it over the fence
+  line 4 = wry and dry, ironic rather than silly
+
+Output exactly four lines. One headline per line. No numbers, no bullets, no labels, no blank lines, no commentary before or after.`;
+
+/* where the text sits, so the photo leaves room for it */
+const COMPOSITION = {
+  A:'the bottom 45% of the frame is covered by a solid panel, so put the subject in the upper half and leave the lower half quiet',
+  B:'heavy text and a reaction row sit across the bottom half, so keep the lower half simple and uncluttered',
+  C:'text runs down the lower-left, so keep the left and bottom of the frame calm and put the subject right of centre',
+  D:'the bottom 40% carries text, so frame the subject in the upper two thirds',
+  E:'the picture sits above a caption bar, so centre the subject and keep the very bottom strip unimportant',
+  F:'large text covers the lower third, so keep it plain and put the subject higher in the frame',
+  G:'the bottom third is a solid panel, so compose the subject in the top two thirds',
+  H:'large text, a flag bar and a reaction row cover the lower half, so keep it plain and put the subject higher in the frame'
+};
+
+const IMAGE_PROMPT = (d, h, comp) => `Write ONE image-generation prompt for the photograph that will sit behind this Facebook post.
+
+THE HEADLINE ON THE POST: "${h}"
+THE STORY IT CAME FROM: """${d}"""
+
+The photograph has to make someone scrolling stop and feel the headline before they read it. Work out what the headline is really about — who it affects, where it happens, what object or gesture stands for it — and describe that one concrete scene.
+
+The image must:
+- be a photorealistic editorial photograph: natural light, shallow depth of field, 35mm lens, muted realistic colour
+- show ONE clear subject that a stranger would connect to the headline in a second — a person from behind or in three-quarter view, hands doing something, an object, a doorway, a street
+- match the mood of the headline: if it is angry, make it tense; if it is about money, show the thing money is spent on; if it is wry, make it plain and slightly absurd
+- be composed for the layout: ${comp}
+- contain NO text, NO letters, NO numbers, NO logos, NO watermarks, NO real or recognisable public figures, NO celebrity likeness
+- look like a press photograph, not an illustration and not a stock photo with people smiling at the camera
+
+Write it as one paragraph of 45 to 70 words in English, comma separated: subject first, then setting, then light, then camera. End with: "no text, no logos, negative space where the caption sits".
+
+Output only that paragraph. No preamble, no quotes, no labels.`;
+
+/* a usable brief with no model at all, built from the headline itself */
+function localBrief(){
+  const h = (S.headline || '').replace(/[?!.]+$/,'').trim();
+  const stop = /^(the|a|an|is|are|be|to|of|for|and|or|in|on|at|it|we|you|they|should|would|le|la|les|des|du|de|un|une|et|ou|en|qui|que|est|sont|pour|dans|avec|pas|vous|on|il|ils|faut|faut-il)$/i;
+  const key = h.split(/\s+/).filter(w => w.length > 3 && !stop.test(w)).slice(0, 6).join(', ');
+  return `Photorealistic editorial press photograph about ${key || h}, one anonymous ordinary person seen from behind `
+    + `or in three-quarter view with the relevant object or place in frame, real street or interior setting, `
+    + `natural overcast daylight, shallow depth of field, 35mm lens, muted realistic colour, documentary mood, `
+    + `${COMPOSITION[S.tpl] || 'keep the lower half calm'}, `
+    + `no text, no logos, no recognisable public figures, negative space where the caption sits.`;
+}
+
+/* ---------- step 1 ---------- */
+async function makeHeadlines(){
+  const d = $('#desc').value.trim();
+  if(d.length < 25){ failStep1('Paste a bit more of the story — a couple of sentences is enough.', false); return; }
+  S.desc = d; hide('#err1');
+  const btns = [$('#gen-heads'), $('#regen')];
+  btns.forEach(b => b.disabled = true);
+  let ok = false;
+  $('#gen-heads').innerHTML = '<span class="spin"></span>Reading the story…';
+  try{
+    const list = fourLines(await ask(HEADLINE_PROMPT(d), 800));
+    if(!list.length) throw new Error('No headlines came back. Try again.');
+    S.headlines = list;
+    ok = true;
+  }catch(e){
+    failStep1(explain(e), true);
+  }
+  finally{ btns.forEach(b => b.disabled = false); $('#gen-heads').textContent = 'Write 4 headlines'; }
+
+  if(ok){                                  // navigation lives outside the try on purpose
+    drawCards();
+    done('s1', d.slice(0,44) + (d.length>44 ? '…' : ''));
+    unlock('s2'); open('s2');
+  }
+}
+
+/* four lines of text is about the most robust thing a model can return */
+function fourLines(txt){
+  return (txt || '')
+    .split('\n')
+    .map(l => l
+      .replace(/^\s*(?:[-*\u2022\u2013\u2014>]+|\d+[.)\]:]|line\s*\d+\s*[:=-]?)\s*/i, '')  // bullets, numbering, "Line 2:"
+      .replace(/^["'\u201c\u2018]+|["'\u201d\u2019]+$/g, '')                    // wrapping quotes
+      .trim())
+    .filter(l => l.length > 3 && !/^(here|voici|sure|okay)\b/i.test(l))
+    .slice(0, 4)
+    .map((text, i) => ({ text, style: STYLES[i] || 'Option' }));
+}
+
+function failStep1(msg, offerFallback){
+  const box = $('#err1');
+  box.innerHTML = '';
+  box.append(msg);
+  if(offerFallback){
+    const b = document.createElement('button');
+    b.className = 'btn ghost sm';
+    b.style.marginTop = '10px';
+    b.textContent = 'Draft 4 headlines here instead';
+    b.onclick = localHeadlines;
+    const c = document.createElement('button');
+    c.className = 'btn ghost sm';
+    c.style.cssText = 'margin-top:10px;margin-left:8px';
+    c.textContent = 'Use a chat instead';
+    c.onclick = ()=>{ $('#manual').open = true; refreshManualPrompt(); $('#manual').scrollIntoView({behavior:'smooth',block:'center'}); };
+    box.append(document.createElement('br'), b, c);
+  }
+  box.hidden = false;
+}
+
+/* no network, no key, still usable — rough drafts built from the text itself */
+function localHeadlines(){
+  const d = (S.desc || $('#desc').value).trim();
+  const first = (d.split(/(?<=[.!?])\s/)[0] || d).replace(/\s+/g,' ').trim();
+  const core = first.replace(/[.!?]+$/,'').replace(/^(le |la |les |l'|un |une |des |the |a |an )/i,'');
+  const short = core.length > 62 ? core.slice(0, 62).replace(/\s\S*$/,'') : core;
+  const fr = /\b(le|la|les|des|une|est|pour|qui|que|dans|avec|pas|vous)\b/i.test(d);
+
+  S.headlines = (fr ? [
+    `${short} : êtes-vous d'accord ?`,
+    `${short}. Et personne ne dit rien ?`,
+    `On vous demande enfin votre avis : ${short.toLowerCase()} ?`,
+    `${short}. Il fallait y penser.`
+  ] : [
+    `${short} — do you agree?`,
+    `${short}. And nobody says a word?`,
+    `They are finally asking us: ${short.toLowerCase()}?`,
+    `${short}. Who could have guessed.`
+  ]).map((text, i) => ({ text, style: STYLES[i] }));
+  S.desc = d;
+  drawCards();
+  $('#cards').insertAdjacentHTML('afterbegin',
+    '<p class="note" style="margin:0 0 4px">Drafted from your own text, no model involved. Read them properly and edit below before posting.</p>');
+  hide('#err1');
+  done('s1', 'Drafted locally');
+  unlock('s2'); open('s2');
+}
+function drawCards(){
+  const box = $('#cards'); box.innerHTML = '';
+  S.headlines.forEach((h,i)=>{
+    const b = document.createElement('button');
+    b.className = 'card'; b.setAttribute('aria-pressed', S.pick===i);
+    b.innerHTML = `<span class="tag">${escapeHTML(h.style || STYLES[i] || 'Option')}</span>
+                   <p>${escapeHTML(h.text)}</p>`;
+    b.onclick = ()=> choose(i);
+    box.appendChild(b);
+  });
+}
+const escapeHTML = s => (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function choose(i){
+  S.pick = i;
+  S.headline = S.headlines[i].text;
+  $('#hl-text').value = S.headline;
+  document.querySelectorAll('#cards .card').forEach((c,k)=> c.setAttribute('aria-pressed', k===i));
+  paint();
+}
+
+/* ---------- step 3 ---------- */
+async function makePrompt(){
+  if(!S.headline.trim()){ show('#err3','Pick or write a headline first — the brief is built from it.'); return; }
+  const b = $('#gen-prompt');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Writing…';
+  const fill = t => {
+    S.prompt = t;
+    $('#promptbox').value = t;
+    $('#genlinks').hidden = false;
+    $('#copy-prompt').disabled = false;
+  };
+  try{
+    fill((await ask(IMAGE_PROMPT(S.desc || S.headline, S.headline, COMPOSITION[S.tpl] || COMPOSITION.B), 700))
+      .replace(/^["'\u201c]+|["'\u201d]+$/g, '').trim());
+    hide('#err3');
+  }catch(e){
+    fill(localBrief());
+    show('#err3', explain(e) + ' A brief built from your headline is below — edit it, or use a chat with the box underneath.');
+  }
+  finally{ b.disabled = false; b.textContent = S.prompt ? 'Rewrite the brief' : 'Write the image brief'; }
+}
+
+/* everything the browser can possibly decode ends up as a plain canvas,
+   which drawImage always accepts and which never taints the export */
+function toCanvas(src, w, h){
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(src, 0, 0, w, h);
+  return c;
+}
+
+/* pull a frame out of a video file */
+function frameFromVideo(file){
+  return new Promise((resolve, reject)=>{
+    const v = document.createElement('video');
+    v.preload = 'auto'; v.muted = true; v.playsInline = true;
+    const url = URL.createObjectURL(file);
+    const done = fn => { URL.revokeObjectURL(url); fn(); };
+    const guard = setTimeout(()=> done(()=> reject(new Error('video-timeout'))), 30000);
+    v.onerror = ()=> { clearTimeout(guard); done(()=> reject(new Error('video-decode'))); };
+    v.onloadeddata = ()=>{
+      const grab = ()=>{
+        clearTimeout(guard);
+        try{
+          const c = toCanvas(v, v.videoWidth, v.videoHeight);
+          done(()=> resolve(c));
+        }catch(e){ done(()=> reject(e)); }
+      };
+      v.onseeked = grab;
+      const at = Math.min(1.5, (v.duration || 3) / 3);
+      if(isFinite(at) && at > 0){ try{ v.currentTime = at; }catch{ grab(); } }
+      else grab();
+    };
+    v.src = url;
+  });
+}
+
+const UNREADABLE = {
+  heic:'iPhone HEIC photos cannot be decoded by most browsers. In Photos choose Share, then Options, then Most Compatible — or just screenshot it.',
+  heif:'HEIF cannot be decoded by most browsers. Export it as JPEG first.',
+  tif:'TIFF is not a web format. Export it as JPEG or PNG.',
+  tiff:'TIFF is not a web format. Export it as JPEG or PNG.',
+  psd:'Photoshop files cannot be opened here. Export the flattened image as PNG or JPEG.',
+  ai:'Illustrator files cannot be opened here. Export as PNG.',
+  pdf:'A PDF is not an image. Export the page as PNG or take a screenshot.',
+  cr2:'Camera raw files cannot be opened here. Export a JPEG from your photo app.',
+  nef:'Camera raw files cannot be opened here. Export a JPEG from your photo app.',
+  arw:'Camera raw files cannot be opened here. Export a JPEG from your photo app.',
+  dng:'Camera raw files cannot be opened here. Export a JPEG from your photo app.',
+  raw:'Camera raw files cannot be opened here. Export a JPEG from your photo app.'
+};
+
+async function decodeAnyFile(file){
+  const name = file.name || '';
+  const ext = (name.split('.').pop() || '').toLowerCase();
+
+  const looksVideo = /^video\//.test(file.type)
+    || ['mp4','webm','ogv','ogg','mov','m4v','mkv','avi','3gp'].includes(ext);
+  if(looksVideo){
+    try{ return { canvas: await frameFromVideo(file), kind:'frame' }; }
+    catch{ throw new Error('That video could not be decoded here. MP4 and WebM usually work; otherwise screenshot a frame.'); }
+  }
+
+  // handles jpg, png, gif, webp, avif, bmp, ico and animated files
+  if(window.createImageBitmap){
+    try{
+      const bmp = await createImageBitmap(file);
+      const c = toCanvas(bmp, bmp.width, bmp.height);
+      if(bmp.close) bmp.close();
+      return { canvas:c, kind:'image' };
+    }catch{}
+  }
+
+  // svg and anything else the <img> tag understands
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await loadImage(url, false);
+    const w = img.naturalWidth || img.width || 1200;
+    const h = img.naturalHeight || img.height || 800;
+    return { canvas: toCanvas(img, w, h), kind:'image' };
+  }catch{
+    // only now say the format is hopeless — Safari opens HEIC, so try before advising
+    throw new Error(UNREADABLE[ext]
+      || `This browser cannot decode ${ext ? '.' + ext : 'that file'}. JPG, PNG, WebP, GIF, AVIF, BMP, SVG and MP4 all work.`);
+  }finally{ setTimeout(()=> URL.revokeObjectURL(url), 5000); }
+}
+
+async function loadFile(f){
+  if(!f){ return; }
+  hide('#err3');
+  $('#drop').innerHTML = '<b>Reading…</b>' + escapeHTML(f.name || 'file');
+  try{
+    const { canvas, kind } = await decodeAnyFile(f);
+    S.img = canvas; S.zoom = 1; S.ox = 0; S.oy = 0; GEN.tainted = false;
+    $('#zoom').value = 100; $('#ox').value = 0; $('#oy').value = 0;
+    $('#tune').hidden = false; $('#to-tpl').disabled = false;
+    $('#drop').innerHTML = `<b>${escapeHTML(f.name || 'image')}</b>${canvas.width} × ${canvas.height}`
+      + (kind === 'frame' ? ' · frame taken from the video' : '') + ' · click to replace';
+    done('s3', kind === 'frame' ? 'Video frame in place' : 'Image in place');
+    paint();
+  }catch(e){
+    $('#drop').innerHTML = '<b>Drop a picture here</b>click to browse, or paste with \u2318V / Ctrl+V';
+    show('#err3', e.message);
+  }
+}
+
+/* ---------- free image generation (Pollinations, no key) ---------- */
+const GEN = { shots:[], tainted:false, pick:null };
+
+/* these models want dimensions that are multiples of 16 and an exact ratio.
+   1080x1440 is neither, which is why output came back soft. */
+const GEN_DIMS = {
+  '1:1':  { standard:[1024,1024], sharp:[1536,1536] },
+  '4:5':  { standard:[1024,1280], sharp:[1536,1920] },
+  '3:4':  { standard:[960,1280],  sharp:[1152,1536] }
+};
+
+function loadImage(src, useCors){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    if(useCors) img.crossOrigin = 'anonymous';
+    const timer = setTimeout(()=>{ img.src = ''; reject(new Error('timeout')); }, 100000);
+    img.onload  = ()=>{ clearTimeout(timer); img.naturalWidth > 10 ? resolve(img) : reject(new Error('empty')); };
+    img.onerror = ()=>{ clearTimeout(timer); reject(new Error('load')); };
+    img.src = src;
+  });
+}
+
+/* three ways in, best first.
+   1 = fetched as a file, canvas stays exportable
+   2 = CORS image, still exportable
+   3 = plain image, displays but locks export (we warn at download time) */
+async function freePhoto(prompt, model, detail, status){
+  const [w, h] = GEN_DIMS[S.size][detail];
+  const seed = Math.floor(Math.random() * 1e9);
+  const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt)
+    + `?width=${w}&height=${h}&model=${model}&nologo=true&seed=${seed}`;
+
+  status('drawing… this usually takes 15 to 40 seconds');
+  const ctl = new AbortController();
+  const timer = setTimeout(()=> ctl.abort(), 100000);
+  let hardFail = null;
+  try{
+    const r = await fetch(url, { signal: ctl.signal, mode:'cors' });
+    if(r.status === 429) hardFail = 'The free service is rate-limiting right now. Wait a minute and generate again.';
+    else if(r.ok){
+      const blob = await r.blob();
+      if(blob.type.startsWith('image/') && blob.size > 1000){
+        status('loading…');
+        const objUrl = URL.createObjectURL(blob);
+        return { src: objUrl, clean:true, url, blob, el: await loadImage(objUrl, false) };
+      }
+    }
+  }catch(e){
+    if(e.name === 'AbortError') hardFail = 'The service did not answer in time. Try again, or switch to the faster style.';
+  }finally{ clearTimeout(timer); }
+  if(hardFail) throw new Error(hardFail);
+
+  status('fetch blocked, loading the image directly…');
+  try{
+    return { src:url, clean:true, url, el: await loadImage(url, true) };
+  }catch{}
+
+  status('retrying without export permission…');
+  try{
+    return { src:url, clean:false, url, el: await loadImage(url, false) };
+  }catch{
+    throw new Error('BLOCKED');
+  }
+}
+
+function useShot(shot){
+  GEN.pick = shot;
+  S.img = shot.el;
+  S.zoom = 1; S.ox = 0; S.oy = 0;
+  GEN.tainted = !shot.clean;
+  $('#zoom').value = 100; $('#ox').value = 0; $('#oy').value = 0;
+  $('#tune').hidden = false; $('#to-tpl').disabled = false;
+  $('#save-row').hidden = false; $('#save-note').hidden = true;
+  done('s3', `Generated photo · ${shot.el.naturalWidth}×${shot.el.naturalHeight}`);
+  paint();
+}
+
+function addShot(shot){
+  GEN.shots.unshift(shot);
+  GEN.shots = GEN.shots.slice(0, 8);
+  const box = $('#shots'); box.innerHTML = ''; box.hidden = false;
+  GEN.shots.forEach((sh, i)=>{
+    const b = document.createElement('button');
+    b.setAttribute('aria-pressed', i === 0);
+    b.title = 'Use this one';
+    const im = document.createElement('img');
+    if(!sh.clean) im.crossOrigin = 'anonymous';
+    im.src = sh.src; im.alt = 'Option ' + (i + 1);
+    b.appendChild(im);
+    b.onclick = ()=>{
+      box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+      useShot(sh);
+    };
+    box.appendChild(b);
+  });
+  useShot(shot);
+}
+
+/* save the generated photo on its own, so it can be re-uploaded or kept */
+async function savePhoto(type){
+  const shot = GEN.pick;
+  if(!shot) return;
+  const mime = type === 'png' ? 'image/png' : 'image/jpeg';
+  const name = `Udari-photo-${Date.now()}.${type}`;
+  const note = $('#save-note');
+  note.hidden = false; note.textContent = 'Preparing…';
+
+  const send = blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+    note.textContent = `Saved as ${name}. Drop it back into the box below if the post will not export.`;
+  };
+
+  // re-encode through a canvas so you get the format you asked for
+  const encode = img => new Promise((resolve, reject)=>{
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ctx = c.getContext('2d');
+    if(type === 'jpg'){ ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height); }
+    ctx.drawImage(img, 0, 0);
+    try{ c.toBlob(b => b ? resolve(b) : reject(new Error('encode')), mime, 0.95); }
+    catch(e){ reject(e); }
+  });
+
+  try{
+    send(await encode(shot.el));
+    return;
+  }catch{}
+
+  // canvas was locked by the other site: fetch the file itself instead
+  try{
+    const r = await fetch(shot.url, { mode:'cors' });
+    if(r.ok){
+      const blob = await r.blob();
+      if(blob.type.startsWith('image/')){
+        if(blob.type === mime) return send(blob);
+        try{
+          return send(await encode(await loadImage(URL.createObjectURL(blob), false)));
+        }catch{
+          // cannot convert, but the picture itself is fine — save it in its own format
+          const ext = blob.type.includes('png') ? 'png' : 'jpg';
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `Udari-photo-${Date.now()}.${ext}`;
+          a.click();
+          setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+          note.textContent = `Saved as .${ext} instead of .${type} — this browser would not convert it. It uploads back in either way.`;
+          return;
+        }
+      }
+    }
+  }catch{}
+
+  // last resort: hand them the picture in a tab to save by hand
+  note.innerHTML = 'This browser will not let the page save that file. ';
+  const a = document.createElement('a');
+  a.href = shot.url; a.target = '_blank'; a.rel = 'noopener';
+  a.style.color = 'var(--signal)';
+  a.textContent = 'Open the photo in a new tab';
+  note.appendChild(a);
+  note.append(' and save it with right-click.');
+}
+
+async function generateFree(){
+  const prompt = $('#promptbox').value.trim();
+  if(!prompt){ show('#err-gen','Write the brief first, or describe the photo yourself.'); $('#promptbox').focus(); return; }
+  hide('#err-gen');
+  const b = $('#gen-image');
+  const status = t => { $('#gen-status').textContent = t; $('#gen-status').hidden = false; };
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Generating…';
+  try{
+    addShot(await freePhoto(prompt, $('#gstyle').value, $('#gdetail').value, status));
+    $('#gen-status').hidden = true;
+  }catch(e){
+    $('#gen-status').hidden = true;
+    if(e.message === 'BLOCKED'){
+      const box = $('#err-gen');
+      box.innerHTML = 'This page is not allowed to load images from that service — most likely the sandbox around it. Running the file from your own computer fixes it. In the meantime you can open the picture yourself and drop it in: ';
+      const a2 = document.createElement('a');
+      a2.href = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt)
+        + `?width=${GEN_DIMS[S.size][$('#gdetail').value][0]}&height=${GEN_DIMS[S.size][$('#gdetail').value][1]}&model=${$('#gstyle').value}&nologo=true&seed=${Math.floor(Math.random()*1e9)}`;
+      a2.target = '_blank'; a2.rel = 'noopener';
+      a2.style.color = 'var(--signal)';
+      a2.textContent = 'open the image in a new tab';
+      box.appendChild(a2);
+      box.hidden = false;
+    } else show('#err-gen', e.message);
+  }finally{
+    b.disabled = false;
+    b.textContent = GEN.shots.length ? 'Generate another' : 'Generate the photo';
+  }
+}
+
+/* ---------- export ---------- */
+function exportPost(type){
+  const [w,h] = DIMS[S.size];
+  const c = document.createElement('canvas');
+  render(c, w*2, h*2, S);
+  const ext = type === 'jpg' ? 'jpg' : 'png';
+  const mime = type === 'jpg' ? 'image/jpeg' : 'image/png';
+  const filename = `Udari-${S.tpl}-${S.size.replace(':','x')}-${Date.now()}.${ext}`;
+
+  const save = blob => {
+    const url = URL.createObjectURL(blob);
+
+    // normal case: this just works and a file lands in Downloads.
+    try{
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }catch(err){
+      // some preview/sandboxed contexts block this outright — the fallback below still works
+    }
+
+    // always show a real, user-clicked link too. Automatic downloads are blocked in some
+    // sandboxed previews (e.g. viewing this file inside a chat's inline preview instead of
+    // a normal browser tab) — a genuine click on a target="_blank" link gets through those
+    // restrictions even when the programmatic download above does not.
+    showExportFallback(url, filename);
+    setTimeout(()=> URL.revokeObjectURL(url), 120000);
+  };
+
+  try{
+    c.toBlob(blob => blob ? save(blob) : tainted(), mime, 0.94);
+  }catch(e){
+    tainted();   // cross-origin image locked the canvas
+  }
+}
+
+function showExportFallback(url, filename){
+  const el = $('#export-fallback');
+  el.innerHTML = '';
+  el.append('Nothing downloaded, or saw a "blocked" page? ');
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.target = '_blank'; a.rel = 'noopener';
+  a.style.color = 'var(--signal)';
+  a.textContent = 'open the image here';
+  el.appendChild(a);
+  el.append(' and save it from there (right-click → Save image as…). That usually means this page is running inside a restricted preview — open the downloaded .html file directly in a browser tab instead and the button above will work normally.');
+  el.hidden = false;
+}
+
+function tainted(){
+  alert('This browser will not let the post be exported, because the generated picture came from another site without export permission.\n\nWay round it: right-click the preview, save the picture, then drop that file back into step 3 and export again.');
+}
+
+/* ---------- small utils ---------- */
+function show(sel,msg){ const e=$(sel); e.textContent=msg; e.hidden=false; }
+function hide(sel){ $(sel).hidden = true; }
+
+/* ============================================================
+   wiring
+   ============================================================ */
+/* ---------- paste lane: any chat, no key, no cost ---------- */
+function refreshManualPrompt(){
+  const d = $('#desc').value.trim();
+  $('#manual-prompt').value = HEADLINE_PROMPT(d || '[paste your news description here]');
+}
+$('#manual').addEventListener('toggle', ()=>{ if($('#manual').open) refreshManualPrompt(); });
+$('#desc').addEventListener('input', ()=>{ if($('#manual').open) refreshManualPrompt(); });
+
+$('#copy-manual').onclick = async ()=>{
+  refreshManualPrompt();
+  const b = $('#copy-manual');
+  try{ await navigator.clipboard.writeText($('#manual-prompt').value); b.textContent = 'Copied'; }
+  catch{ $('#manual-prompt').select(); b.textContent = 'Press Ctrl+C'; }
+  setTimeout(()=> b.textContent = 'Copy instruction', 1800);
+};
+
+$('#use-manual').onclick = ()=>{
+  const list = fourLines($('#manual-paste').value);
+  if(!list.length){ show('#err-manual','No headlines found in that. Paste the lines the chat wrote, one per line.'); return; }
+  hide('#err-manual'); hide('#err1');
+  S.desc = $('#desc').value.trim();
+  S.headlines = list;
+  drawCards();
+  if(list.length < 4)
+    $('#cards').insertAdjacentHTML('afterbegin',
+      `<p class="note" style="margin:0 0 4px">Found ${list.length} of 4 — paste the rest if some are missing.</p>`);
+  done('s1', 'Pasted in');
+  unlock('s2'); open('s2');
+};
+
+$('#gen-heads').onclick = makeHeadlines;
+$('#regen').onclick = makeHeadlines;
+$('#skip-ai').onclick = ()=>{
+  S.desc = $('#desc').value.trim();
+  S.headlines = []; $('#cards').innerHTML = '<p class="note">Writing your own — type it below.</p>';
+  done('s1', S.desc ? 'Own headline' : 'Skipped'); unlock('s2'); open('s2'); $('#hl-text').focus();
+};
+
+$('#hl-text').oninput = e => { S.headline = e.target.value; paint(); };
+$('#hl-hi').oninput   = e => { S.highlight = e.target.value; paint(); };
+$('#hl-hi2').oninput  = e => { S.highlight2 = e.target.value; paint(); };
+$('#lbl-yes').oninput = e => { S.yes = e.target.value; paint(); };
+$('#lbl-no').oninput  = e => { S.no  = e.target.value; paint(); };
+
+$('#to-img').onclick = ()=>{
+  if(!S.headline.trim()){ $('#hl-text').focus(); return; }
+  done('s2', S.headline.slice(0,40) + (S.headline.length>40?'…':''));
+  unlock('s3'); open('s3');
+  if(!$('#promptbox').value.trim()) makePrompt();   // have it ready before they ask
+};
+
+$('#gen-prompt').onclick = makePrompt;
+
+function refreshBriefPrompt(){
+  $('#brief-prompt').value = IMAGE_PROMPT(
+    S.desc || S.headline || '[your news description]',
+    S.headline || '[your headline]',
+    COMPOSITION[S.tpl] || COMPOSITION.B);
+}
+$('#manual3').addEventListener('toggle', ()=>{ if($('#manual3').open) refreshBriefPrompt(); });
+$('#copy-brief-prompt').onclick = async ()=>{
+  refreshBriefPrompt();
+  const b = $('#copy-brief-prompt');
+  try{ await navigator.clipboard.writeText($('#brief-prompt').value); b.textContent = 'Copied'; }
+  catch{ $('#brief-prompt').select(); b.textContent = 'Press Ctrl+C'; }
+  setTimeout(()=> b.textContent = 'Copy instruction', 1800);
+};
+$('#use-brief').onclick = ()=>{
+  const t = $('#brief-paste').value.replace(/^["'\u201c]+|["'\u201d]+$/g,'').trim();
+  if(t.length < 25){ show('#err-brief','That looks too short. Paste the whole paragraph.'); return; }
+  hide('#err-brief'); hide('#err3');
+  S.prompt = t;
+  $('#promptbox').value = t;
+  $('#copy-prompt').disabled = false; $('#genlinks').hidden = false;
+  $('#manual3').open = false;
+};
+$('#gen-image').onclick = generateFree;
+$('#save-jpg').onclick = ()=> savePhoto('jpg');
+$('#save-png').onclick = ()=> savePhoto('png');
+$('#promptbox').oninput = e => { S.prompt = e.target.value; $('#copy-prompt').disabled = !S.prompt.trim(); };
+
+$('#copy-prompt').onclick = async ()=>{
+  try{ await navigator.clipboard.writeText(S.prompt); $('#copy-prompt').textContent = 'Copied'; }
+  catch{ $('#copy-prompt').textContent = 'Select it and copy'; }
+  setTimeout(()=> $('#copy-prompt').textContent = 'Copy brief', 1600);
+};
+
+const drop = $('#drop');
+drop.onclick = ()=> $('#file').click();
+$('#file').onchange = e => loadFile(e.target.files[0]);
+['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e=> loadFile(e.dataTransfer.files[0]));
+window.addEventListener('paste', e=>{
+  const it = [...(e.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'));
+  if(it) loadFile(it.getAsFile());
+});
+
+$('#zoom').oninput = e => { S.zoom = e.target.value/100; paint(); };
+$('#ox').oninput   = e => { S.ox = e.target.value/50; paint(); };
+$('#oy').oninput   = e => { S.oy = e.target.value/50; paint(); };
+
+$('#to-tpl').onclick = ()=>{ unlock('s4'); open('s4'); };
+$('#to-size').onclick = ()=>{ done('s4', TPL[S.tpl].name); unlock('s5'); open('s5'); };
+
+$('#show-react').onchange  = e => { S.react = e.target.checked; paint(); };
+$('#emoji-icons').onchange = e => { S.emoji = e.target.checked; paint(); };
+$('#badge').oninput        = e => { S.badge = e.target.value; paint(); };
+$('#subtitle').oninput     = e => { S.subtitle = e.target.value; paint(); };
+$('#brand').oninput        = e => { S.brand = e.target.value; paint(); };
+
+document.querySelectorAll('.size').forEach(b=>{
+  b.onclick = ()=>{
+    S.size = b.dataset.size;
+    document.querySelectorAll('.size').forEach(x=> x.setAttribute('aria-pressed', x===b));
+    done('s5', S.size); paint();
+  };
+});
+
+$('#download').onclick = ()=> exportPost('png');
+$('#download-jpg').onclick = ()=> exportPost('jpg');
+
+$('#reset').onclick = ()=>{ if(confirm('Clear everything and start a new post?')) location.reload(); };
+
+
+/* boot */
+S.headline = 'Faut-il supprimer les avantages à vie des anciens présidents ?';
+S.highlight = 'les avantages à vie';
+$('#hl-text').value = S.headline; $('#hl-hi').value = S.highlight; $('#hl-hi2').value = S.highlight2;
+try{ buildPicks(); }catch(e){ console.error(e); }
+(document.fonts ? document.fonts.load('400 100px Anton').catch(()=>{}) : Promise.resolve())
+  .then(()=> document.fonts && document.fonts.ready).catch(()=>{})
+  .finally(()=>{ fontsReady = true; try{ paint(); }catch(e){ console.error(e); } });
+try{ paint(); }catch(e){ console.error(e); }
+
+</script>
