@@ -32,6 +32,16 @@ class CaptionResponse(BaseModel):
     description: str
 
 
+class ImagePromptRequest(BaseModel):
+    story: str = Field(min_length=1, max_length=20000)
+    headline: str = Field(min_length=1, max_length=500)
+    composition: str = Field(min_length=1, max_length=500)
+
+
+class ImagePromptResponse(BaseModel):
+    prompt: str
+
+
 def caption_prompt(story: str, headline: str) -> str:
     return f'''Write a long Facebook post description based only on this news story and headline.
 
@@ -54,6 +64,20 @@ RULES
 - Do not use headings, bullet points, fake quotes, invented statistics or instructions to like and share. A small number of relevant emojis is allowed only when it genuinely suits the story.
 
 Output only the finished description.'''
+
+
+def image_prompt(story: str, headline: str, composition: str) -> str:
+    return f'''Write ONE image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph that will sit behind this Facebook post.
+
+HEADLINE: "{headline}"
+STORY:
+"""{story}"""
+
+Write in natural UK English. Make the image emotionally engaging and ultra-realistic, so someone scrolling immediately feels the human stakes of the headline. Show one concrete editorial scene with one clear subject, believable emotion, natural light, shallow depth of field and a 35mm lens. Use an anonymous person, hands, an object or a place, never a recognisable public figure.
+
+LAYOUT: {composition}
+
+The image must contain no text, letters, numbers, logos, watermarks or celebrity likeness. It must look like a real press photograph, not an illustration or a smiling stock photo. Write one paragraph of 45 to 70 words, comma separated: subject first, then setting, then light, then camera. End with: "no text, no logos, negative space where the caption sits". Output only that paragraph.'''
 
 
 @app.get("/", include_in_schema=False)
@@ -96,3 +120,33 @@ async def generate_caption(request: CaptionRequest) -> CaptionResponse:
     if not content:
         raise HTTPException(status_code=502, detail="Groq returned an empty description.")
     return CaptionResponse(description=content)
+
+
+@app.post("/api/image-prompt", response_model=ImagePromptResponse)
+async def generate_image_prompt(request: ImagePromptRequest) -> ImagePromptResponse:
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY is not configured on the server.")
+
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": image_prompt(request.story, request.headline, request.composition)}],
+        "temperature": 0.8,
+        "max_tokens": 300,
+    }
+    headers = {"Authorization": f"Bearer {api_key}"}
+    try:
+        async with httpx.AsyncClient(timeout=75) as client:
+            response = await client.post(GROQ_URL, json=payload, headers=headers)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail="Could not reach Groq.") from exc
+
+    if response.status_code >= 400:
+        raise HTTPException(status_code=502, detail="Groq rejected the image prompt request.")
+    try:
+        content = response.json()["choices"][0]["message"]["content"].strip()
+    except (KeyError, IndexError, TypeError, AttributeError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail="Groq returned an invalid image prompt.") from exc
+    if not content:
+        raise HTTPException(status_code=502, detail="Groq returned an empty image prompt.")
+    return ImagePromptResponse(prompt=content)

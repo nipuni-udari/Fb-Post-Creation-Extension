@@ -228,8 +228,8 @@
   <section class="step" id="s1" data-open="1">
     <div class="step-head"><div class="num">1</div><div class="step-title">News description<span class="step-sub" id="sub1">Paste the story</span></div><div class="chev">▾</div></div>
     <div class="step-body">
-      <label class="lbl" for="desc">Paste the news text. Any language — headlines come back in the same one.</label>
-      <textarea id="desc" placeholder="Exemple : Le gouvernement étudie une réforme des avantages accordés à vie aux anciens présidents de la République : voiture avec chauffeur, protection policière, bureau et collaborateurs financés par l'État…"></textarea>
+      <label class="lbl" for="desc">Paste the news text. Headlines, captions and image prompts are written in UK English.</label>
+      <textarea id="desc" placeholder="Example: The government is considering reforming the lifelong benefits given to former presidents: a chauffeur-driven car, police protection, an office and publicly funded staff..."></textarea>
       <div class="row" style="margin-top:11px">
         <button class="btn" id="gen-heads" style="flex:0 0 auto">Write 4 headlines</button>
         <button class="btn ghost sm" id="skip-ai" style="flex:0 0 auto">Skip — I'll write my own</button>
@@ -269,7 +269,7 @@
       <textarea id="hl-text" style="min-height:70px"></textarea>
 
       <label class="lbl" style="margin-top:12px" for="hl-hi">Words in yellow <span style="opacity:.6">— comma separated, add as many as you like</span></label>
-      <input type="text" id="hl-hi" placeholder="e.g. AVANTAGES À VIE, RÉFORME, ÉTAT">
+          <input type="text" id="hl-hi" placeholder="e.g. LIFELONG BENEFITS, REFORM, PUBLIC MONEY">
 
       <label class="lbl" style="margin-top:10px" for="hl-hi2">Words in red <span style="opacity:.6">— comma separated, add as many as you like</span></label>
       <input type="text" id="hl-hi2" placeholder="e.g. PRISON, INTERDIT, SCANDALE">
@@ -288,11 +288,11 @@
       <div class="row" style="margin-top:12px">
         <div style="flex:0 0 140px;min-width:120px">
           <label class="lbl" for="lbl-yes">Thumb label (YES)</label>
-          <input type="text" id="lbl-yes" value="OUI">
+          <input type="text" id="lbl-yes" value="YES">
         </div>
         <div style="flex:0 0 140px;min-width:120px">
           <label class="lbl" for="lbl-no">Heart label (NO)</label>
-          <input type="text" id="lbl-no" value="NON">
+          <input type="text" id="lbl-no" value="NO">
         </div>
       </div>
       <button class="btn" id="to-img" style="margin-top:12px">Next: the picture</button>
@@ -303,14 +303,14 @@
   <section class="step" id="s3" data-locked="1">
     <div class="step-head"><div class="num">3</div><div class="step-title">The picture<span class="step-sub" id="sub3">Generate a brief, drop the image in</span></div><div class="chev">▾</div></div>
     <div class="step-body">
-      <p class="note">Claude writes the brief, then generates the photo from it — free, no account, no key. You can also paste the brief into your own generator, or drop in a picture you already have.</p>
+      <p class="note">The LLM writes an emotional, ultra-realistic brief from your headline, then the photo is generated from that brief. You can also edit it or drop in a picture you already have.</p>
 
       <div class="row" style="margin-top:12px">
-        <button class="btn" id="gen-prompt" style="flex:0 0 auto">Write the image brief</button>
+        <button class="btn" id="gen-prompt" style="flex:0 0 auto">Create the image prompt</button>
         <button class="btn ghost sm" id="copy-prompt" style="flex:0 0 auto" disabled>Copy brief</button>
       </div>
-      <label class="lbl" style="margin-top:12px" for="promptbox">Image brief — edit before generating</label>
-      <textarea id="promptbox" style="min-height:100px" placeholder="Press Write the image brief, or describe the photo yourself."></textarea>
+      <label class="lbl" style="margin-top:12px" for="promptbox">AI image prompt — edit before generating</label>
+      <textarea id="promptbox" style="min-height:100px" placeholder="Create the image prompt, or describe the photo yourself."></textarea>
 
       <details class="manual" id="manual3">
         <summary>Or write the brief in any chat <span class="manual-tag">free, no key</span></summary>
@@ -330,7 +330,7 @@
       </details>
 
       <div class="freegen">
-        <div class="freegen-head">Generate the photo — free, no key</div>
+        <div class="freegen-head">Generate the photo from this prompt</div>
         <div class="row" style="align-items:center">
           <button class="btn" id="gen-image" style="flex:0 0 auto">Generate the photo</button>
           <select id="gstyle" style="flex:0 0 140px">
@@ -341,7 +341,7 @@
             <option value="sharp">Sharper, slower</option>
             <option value="standard">Standard, quicker</option>
           </select>
-          <span class="note" style="flex:1 1 180px">Runs on Pollinations, a free public service. 10–30 seconds. Busy at times.</span>
+          <span class="note" style="flex:1 1 180px">Uses the prompt above with Pollinations. 10–30 seconds. Busy at times.</span>
         </div>
         <p class="note" id="gen-status" hidden style="margin:10px 0 0"></p>
         <div class="err" id="err-gen" hidden></div>
@@ -388,11 +388,11 @@
       <div class="row" style="margin-top:12px">
         <div>
           <label class="lbl" for="badge">Badge / kicker <span style="opacity:.6">— B, D, F</span></label>
-          <input type="text" id="badge" value="DÉBAT" placeholder="DÉBAT">
+          <input type="text" id="badge" value="DEBATE" placeholder="DEBATE">
         </div>
         <div>
           <label class="lbl" for="subtitle">Strapline <span style="opacity:.6">— D</span></label>
-          <input type="text" id="subtitle" value="Décryptage, chiffres et analyse" placeholder="Décryptage, chiffres et analyse">
+          <input type="text" id="subtitle" value="Facts, figures and analysis" placeholder="Facts, figures and analysis">
         </div>
         <div>
           <label class="lbl" for="brand">Page name <span style="opacity:.6">— E, G</span></label>
@@ -446,12 +446,12 @@
    ============================================================ */
 const S = {
   desc:'', headlines:[], pick:-1,
-  headline:'', highlight:'', highlight2:'', yes:'OUI', no:'NON',
+  headline:'', highlight:'', highlight2:'', yes:'YES', no:'NO',
   caption:'',
   prompt:'', img:null, zoom:1, ox:0, oy:0,
   tpl:'A', size:'1:1',
-  react:true, emoji:false, badge:'DÉBAT',
-  subtitle:'Décryptage, chiffres et analyse', brand:''
+  react:true, emoji:false, badge:'DEBATE',
+  subtitle:'Facts, figures and analysis', brand:''
 };
 
 const DIMS = { '1:1':[1080,1080], '4:5':[1080,1350], '3:4':[1080,1440] };
@@ -665,7 +665,7 @@ function reactionRow(ctx, cx, y, W, st, style){
   const font = Math.round(W*0.055);
   ctx.letterSpacing = '0px';
   ctx.font = `${font}px ${DISPLAY}`;
-  const A = (st.yes||'OUI').toUpperCase(), B = (st.no||'NON').toUpperCase();
+  const A = (st.yes||'YES').toUpperCase(), B = (st.no||'NO').toUpperCase();
   const gap = W*0.028, pad = W*0.055;
   const wA = ctx.measureText(A).width, wB = ctx.measureText(B).width;
   const badge = style==='badge' ? icon*1.42 : icon*1.15;
@@ -798,12 +798,12 @@ function drawC(ctx, W, H, st){                 // yellow frame + left-aligned
       ctx.fillText(label.toUpperCase(), x, rowY + font*0.03);
       x += ctx.measureText(label.toUpperCase()).width;
     };
-    one('👍', st.no || 'NON');
+    one('👍', st.no || 'NO');
     const dx = x + W*0.05;
     ctx.strokeStyle='rgba(255,255,255,.45)'; ctx.lineWidth=Math.max(1,W*0.002);
     ctx.beginPath(); ctx.moveTo(dx, rowY-font*0.62); ctx.lineTo(dx, rowY+font*0.62); ctx.stroke();
     x += W*0.10;
-    one('❤️', st.yes || 'OUI');
+    one('❤️', st.yes || 'YES');
     ctx.textBaseline = 'alphabetic';
     y -= font*2.6;
   }
@@ -997,7 +997,7 @@ function drawG(ctx, W, H, st){
 
 const TPL = {
   A:{name:'Poll panel',  hint:'Navy block + tricolor', draw:drawA},
-  B:{name:'Débat',       hint:'Full bleed + flag bar + poll', draw:drawB},
+  B:{name:'Debate',       hint:'Full bleed + flag bar + poll', draw:drawB},
   C:{name:'Yellow frame',hint:'Left aligned + border',  draw:drawC},
   D:{name:'Question',    hint:'Badge + gold rule',       draw:drawD},
   E:{name:'Caption bar', hint:'Photo above, black bar',  draw:drawE},
@@ -1077,77 +1077,9 @@ document.querySelectorAll('.step-head').forEach(h=>{
   };
 });
 
-/* ============================================================
-   Claude API
-   ============================================================ */
-const API = {
-  url:'https://api.anthropic.com/v1/messages',
-  models:['claude-sonnet-4-6','claude-sonnet-5','claude-haiku-4-5-20251001'],
-  model:null              // the first one that answered, reused after that
-};
-
-class ApiError extends Error{
-  constructor(msg, kind){ super(msg); this.kind = kind; }   // auth | model | network | busy | other
-}
-
-async function request(model, prompt, maxTokens){
-  const headers = {'Content-Type':'application/json'};
-  const ctl = new AbortController();
-  const timer = setTimeout(()=> ctl.abort(), 75000);
-  let res;
-  try{
-    res = await fetch(API.url, {
-      method:'POST', headers, signal: ctl.signal,
-      body: JSON.stringify({ model, max_tokens: maxTokens || 1000, messages:[{role:'user', content: prompt}] })
-    });
-  }catch(e){
-    throw new ApiError(e.name === 'AbortError' ? 'The request timed out.' : 'The browser could not reach api.anthropic.com.', 'network');
-  }finally{ clearTimeout(timer); }
-
-  if(!res.ok){
-    const body = await res.text().catch(()=> '');
-    let msg = `HTTP ${res.status}`;
-    try{ const j = JSON.parse(body); if(j?.error?.message) msg = j.error.message; }catch{}
-    if(res.status === 401 || res.status === 403) throw new ApiError(msg, 'auth');
-    if(res.status === 404 || /model/i.test(msg))  throw new ApiError(msg, 'model');
-    if(res.status === 429 || res.status >= 500)   throw new ApiError(msg, 'busy');
-    throw new ApiError(msg, 'other');
-  }
-  const data = await res.json();
-  const text = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
-  if(!text) throw new ApiError('The model sent back an empty answer.', 'other');
-  return text;
-}
-
-async function ask(prompt, maxTokens){
-  const models = API.model ? [API.model, ...API.models.filter(m => m !== API.model)] : API.models;
-  let last;
-  for(const model of models){
-    for(let attempt = 0; attempt < 2; attempt++){
-      try{
-        const out = await request(model, prompt, maxTokens);
-        API.model = model;
-        return out;
-      }catch(e){
-        last = e;
-        if(e.kind === 'busy' && attempt === 0){ await sleep(1200); continue; }  // one retry
-        break;
-      }
-    }
-    if(last.kind !== 'model') break;   // only a rejected model name is worth trying the next one
-  }
-  throw last;
-}
-const sleep = ms => new Promise(r=> setTimeout(r, ms));
-
 /* turn an error into something the person can act on */
 function explain(e){
-  if(!(e instanceof ApiError)) return e.message || 'Something went wrong.';
-  if(e.kind === 'network') return 'Could not reach Claude. Check your connection and try again.';
-  if(e.kind === 'auth')    return 'Claude refused the request. Reload the page and try again.';
-  if(e.kind === 'busy')    return 'Claude is busy right now. Wait a few seconds and try again.';
-  if(e.kind === 'model')   return 'No model accepted the request: ' + e.message;
-  return e.message;
+  return e?.message || 'Something went wrong.';
 }
 
 const STYLES = ['Question','Provocation','Conversational','Wry'];
@@ -1160,7 +1092,7 @@ STORY:
 AUDIENCE: 45 to 80 years old. What moves them: fairness and who is getting away with something; money, theirs and how public money is spent; respect for rules and for the people who follow them; being asked their opinion after years of not being asked. They read fast, on a phone, often without glasses.
 
 RULES
-- Write in the same language as the story.
+  - Write in natural UK English, using British spelling and phrasing.
 - 4 to 14 words each. Short punchy words, no jargon.
 - Must read at a glance in big capital letters. No quotation marks, no numbering inside the headline itself.
 - Do not invent anything that is not in the story.
@@ -1206,7 +1138,7 @@ const COMPOSITION = {
   H:'large text, a flag bar and a reaction row cover the lower half, so keep it plain and put the subject higher in the frame'
 };
 
-const IMAGE_PROMPT = (d, h, comp) => `Write ONE image-generation prompt for the photograph that will sit behind this Facebook post.
+const IMAGE_PROMPT = (d, h, comp) => `Write ONE image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph that will sit behind this Facebook post.
 
 THE HEADLINE ON THE POST: "${h}"
 THE STORY IT CAME FROM: """${d}"""
@@ -1214,7 +1146,7 @@ THE STORY IT CAME FROM: """${d}"""
 The photograph has to make someone scrolling stop and feel the headline before they read it. Work out what the headline is really about — who it affects, where it happens, what object or gesture stands for it — and describe that one concrete scene.
 
 The image must:
-- be a photorealistic editorial photograph: natural light, shallow depth of field, 35mm lens, muted realistic colour
+- be an emotionally engaging, ultra-realistic editorial photograph: natural light, believable human emotion, shallow depth of field, 35mm lens, muted realistic colour
 - show ONE clear subject that a stranger would connect to the headline in a second — a person from behind or in three-quarter view, hands doing something, an object, a doorway, a street
 - match the mood of the headline: if it is angry, make it tense; if it is about money, show the thing money is spent on; if it is wry, make it plain and slightly absurd
 - be composed for the layout: ${comp}
@@ -1254,7 +1186,14 @@ async function makeHeadlines(){
   let ok = false;
   $('#gen-heads').innerHTML = '<span class="spin"></span>Reading the story…';
   try{
-    const list = fourLines(await ask(HEADLINE_PROMPT(d), 800));
+    const response = await fetch('/.netlify/functions/headlines', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ story: d })
+    });
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || `Headline service returned HTTP ${response.status}.`);
+    const list = fourLines(data.headlines || '');
     if(!list.length) throw new Error('No headlines came back. Try again.');
     S.headlines = list;
     ok = true;
@@ -1309,19 +1248,12 @@ function localHeadlines(){
   const first = (d.split(/(?<=[.!?])\s/)[0] || d).replace(/\s+/g,' ').trim();
   const core = first.replace(/[.!?]+$/,'').replace(/^(le |la |les |l'|un |une |des |the |a |an )/i,'');
   const short = core.length > 62 ? core.slice(0, 62).replace(/\s\S*$/,'') : core;
-  const fr = /\b(le|la|les|des|une|est|pour|qui|que|dans|avec|pas|vous)\b/i.test(d);
-
-  S.headlines = (fr ? [
-    `${short} : êtes-vous d'accord ?`,
-    `${short}. Et personne ne dit rien ?`,
-    `On vous demande enfin votre avis : ${short.toLowerCase()} ?`,
-    `${short}. Il fallait y penser.`
-  ] : [
+  S.headlines = [
     `${short} — do you agree?`,
     `${short}. And nobody says a word?`,
     `They are finally asking us: ${short.toLowerCase()}?`,
     `${short}. Who could have guessed.`
-  ]).map((text, i) => ({ text, style: STYLES[i] }));
+  ].map((text, i) => ({ text, style: STYLES[i] }));
   S.desc = d;
   drawCards();
   $('#cards').insertAdjacentHTML('afterbegin',
@@ -1355,7 +1287,7 @@ function choose(i){
 async function makePrompt(){
   if(!S.headline.trim()){ show('#err3','Pick or write a headline first — the brief is built from it.'); return; }
   const b = $('#gen-prompt');
-  b.disabled = true; b.innerHTML = '<span class="spin"></span>Writing…';
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Creating…';
   const fill = t => {
     S.prompt = t;
     $('#promptbox').value = t;
@@ -1363,14 +1295,26 @@ async function makePrompt(){
     $('#copy-prompt').disabled = false;
   };
   try{
-    fill((await ask(IMAGE_PROMPT(S.desc || S.headline, S.headline, COMPOSITION[S.tpl] || COMPOSITION.B), 700))
+    const response = await fetch('/.netlify/functions/image-prompt', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        story: S.desc || S.headline,
+        headline: S.headline,
+        composition: COMPOSITION[S.tpl] || COMPOSITION.B
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || `Image prompt service returned HTTP ${response.status}.`);
+    fill((data.prompt || '')
       .replace(/^["'\u201c]+|["'\u201d]+$/g, '').trim());
+    if(!S.prompt) throw new Error('Image prompt service returned an empty prompt.');
     hide('#err3');
   }catch(e){
     fill(localBrief());
     show('#err3', explain(e) + ' A brief built from your headline is below — edit it, or use a chat with the box underneath.');
   }
-  finally{ b.disabled = false; b.textContent = S.prompt ? 'Rewrite the brief' : 'Write the image brief'; }
+  finally{ b.disabled = false; b.textContent = S.prompt ? 'Rewrite the prompt' : 'Create the image prompt'; }
 }
 
 async function makeCaption(){
@@ -1900,8 +1844,8 @@ $('#reset').onclick = ()=>{ if(confirm('Clear everything and start a new post?')
 
 
 /* boot */
-S.headline = 'Faut-il supprimer les avantages à vie des anciens présidents ?';
-S.highlight = 'les avantages à vie';
+S.headline = 'Should former presidents keep lifelong benefits?';
+S.highlight = 'lifelong benefits';
 $('#hl-text').value = S.headline; $('#hl-hi').value = S.highlight; $('#hl-hi2').value = S.highlight2;
 try{ buildPicks(); }catch(e){ console.error(e); }
 (document.fonts ? document.fonts.load('400 100px Anton').catch(()=>{}) : Promise.resolve())
