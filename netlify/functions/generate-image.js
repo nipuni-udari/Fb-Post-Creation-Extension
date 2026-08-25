@@ -30,8 +30,7 @@ exports.handler = async function handler(event) {
 
   const prompt = typeof request.prompt === 'string' ? request.prompt.trim() : '';
   const size = typeof request.size === 'string' ? request.size : '1:1';
-  const aspectRatio = { '1:1': '1:1', '4:5': '3:4', '3:4': '3:4' }[size];
-  if (!prompt || prompt.length > 5000 || !aspectRatio) {
+  if (!prompt || prompt.length > 5000 || !['1:1', '4:5', '3:4'].includes(size)) {
     return json(400, { detail: 'A valid image prompt and size are required.' });
   }
 
@@ -43,10 +42,7 @@ exports.handler = async function handler(event) {
         Authorization: `Bearer ${apiToken}`
       },
       body: JSON.stringify({
-        prompt,
-        num_steps: 8,
-        width: aspectRatio === '1:1' ? 1024 : 896,
-        height: aspectRatio === '1:1' ? 1024 : 1152
+        prompt
       })
     });
     const data = await response.json().catch(() => ({}));
