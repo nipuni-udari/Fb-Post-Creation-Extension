@@ -1142,21 +1142,19 @@ const IMAGE_PROMPT = (d, h, comp) => `Write ONE detailed image-generation prompt
 HEADLINE: "${h}"
 SOURCE STORY: """${d}"""
 
-First identify the headline's central human question and the single subject that must carry it visually. Create a scene that makes someone scrolling stop and feel the issue before reading the words. The subject must be unmistakable and visually dominant, placed prominently in the foreground and midground. Add only secondary details that strengthen the story: a relevant object, place, vehicle, building, landscape or anonymous observer in the background. Never turn the image into a generic symbol or a collage.
+First identify the headline's central human question, the concrete noun it is about, and the real-world action or situation being discussed. Turn that into one specific visual scene. Never use a list of extracted headline words, abstract verbs, or vague concepts as the subject. Create a scene that makes someone scrolling stop and feel the issue before reading the words. The subject must be unmistakable and visually dominant, placed prominently in the foreground and midground. Add only secondary details that strengthen the story: a relevant object, place, vehicle, building, landscape or anonymous observer in the background. Never turn the image into a generic symbol or a collage.
 
 Describe a high-emotional-engagement, ultra-realistic editorial photograph in a recognisably British setting when the story supports it. Make the emotion visible through expression, posture, hands, distance, gesture and body language. Match the mood precisely: urgent and tense for danger or conflict, worried and intimate for household impact, dignified and human for loss, quietly absurd for a wry story. Use believable scale, authentic materials, natural imperfections and documentary photojournalism. State the lighting, weather, atmosphere, camera position, lens and depth of field. Apply this layout constraint: ${comp}
 
-The final prompt must explicitly forbid text, captions, letters, numbers, logos, watermarks, signs with readable writing, recognisable public figures, politicians, celebrities, propaganda-poster styling, CGI, illustration, cartoon effects, distorted anatomy, extra fingers, duplicated people, exaggerated action-movie effects and a glossy stock-photo look. Do not invent facts, uniforms, locations or objects that the story does not support.
+The final prompt must explicitly forbid text, captions, letters, numbers, logos, watermarks, signs with readable writing, recognisable public figures, politicians, celebrities, propaganda-poster styling, CGI, illustration, cartoon effects, distorted anatomy, extra fingers, duplicated people, exaggerated action-movie effects and a glossy stock-photo look. Do not invent facts, uniforms, locations or objects that the story does not support. If the headline asks about a policy or decision, show the real people, equipment, place or action affected by that decision, not the words of the question and not a random symbolic object.
 
 Output only the finished prompt as one polished paragraph of 100 to 170 words. Begin with: "Ultra-realistic, high-emotional-engagement editorial photograph asking: ${h}". Then describe the dominant subject, composition, setting, atmosphere, emotion, lighting and camera. End with: "no text, no captions, no logos, no watermarks, no recognisable public figures, negative space where the caption sits". No preamble, quotes or labels.`;
 
 /* a usable brief with no model at all, built from the headline itself */
 function localBrief(){
   const h = (S.headline || '').replace(/[?!.]+$/,'').trim();
-  const stop = /^(the|a|an|is|are|be|to|of|for|and|or|in|on|at|it|we|you|they|should|would|le|la|les|des|du|de|un|une|et|ou|en|qui|que|est|sont|pour|dans|avec|pas|vous|on|il|ils|faut|faut-il)$/i;
-  const key = h.split(/\s+/).filter(w => w.length > 3 && !stop.test(w)).slice(0, 6).join(', ');
-  return `Ultra-realistic, high-emotional-engagement editorial photograph asking: ${S.headline}, dominant subject ${key || h} in the foreground and midground, `
-    + `one anonymous person in a natural three-quarter view with the relevant object or place clearly supporting the story, `
+  return `Ultra-realistic, high-emotional-engagement editorial photograph asking: ${S.headline}, a concrete real-world scene showing the people, object, place or action directly affected by this headline, `
+    + `the headline's main subject unmistakably dominant in the foreground and midground, with one anonymous person in a natural three-quarter view where a person is relevant, `
     + `recognisably British street or interior setting where relevant, visible human emotion and believable body language, `
     + `natural overcast daylight, realistic weather and environmental imperfections, shallow depth of field, 35mm lens, muted realistic colour, documentary photojournalism, `
     + `${COMPOSITION[S.tpl] || 'keep the lower half calm'}, `
