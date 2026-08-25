@@ -334,13 +334,13 @@
         <div class="row" style="align-items:center">
           <button class="btn" id="gen-image" style="flex:0 0 auto">Generate the photo</button>
           <select id="gstyle" style="flex:0 0 140px">
-            <option value="gemini-2.5-flash-image">Nano Banana</option>
+            <option value="@cf/black-forest-labs/flux-1-schnell">Cloudflare Flux</option>
           </select>
           <select id="gdetail" style="flex:0 0 150px">
             <option value="sharp">High quality</option>
             <option value="standard">Standard</option>
           </select>
-          <span class="note" style="flex:1 1 180px">Uses Google Gemini Nano Banana. 10–30 seconds. The API key stays on the server.</span>
+          <span class="note" style="flex:1 1 180px">Uses Cloudflare Workers AI. 10–30 seconds. The API token stays on the server.</span>
         </div>
         <p class="note" id="gen-status" hidden style="margin:10px 0 0"></p>
         <div class="err" id="err-gen" hidden></div>
@@ -1467,7 +1467,7 @@ function loadImage(src, useCors){
 }
 
 async function geminiPhoto(prompt, status){
-  status('Google Gemini is creating the image…');
+  status('Cloudflare Workers AI is creating the image…');
   const ctl = new AbortController();
   const timer = setTimeout(()=> ctl.abort(), 100000);
   try{

@@ -1,5 +1,4 @@
-const GEMINI_MODEL = 'gemini-2.5-flash-image';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const CLOUDFLARE_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -16,8 +15,11 @@ exports.handler = async function handler(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
   if (event.httpMethod !== 'POST') return json(405, { detail: 'POST required.' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return json(500, { detail: 'GEMINI_API_KEY is not configured in Netlify.' });
+  const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  if (!apiToken || !accountId) {
+    return json(500, { detail: 'CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID must be configured in Netlify.' });
+  }
 
   let request;
   try {
@@ -34,30 +36,28 @@ exports.handler = async function handler(event) {
   }
 
   try {
-    const response = await fetch(`${GEMINI_URL}?key=${encodeURIComponent(apiKey)}`, {
+    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/run/${CLOUDFLARE_MODEL}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiToken}`
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseModalities: ['IMAGE'],
-          imageConfig: { aspectRatio }
-        }
+        prompt,
+        num_steps: 8,
+        width: aspectRatio === '1:1' ? 1024 : 896,
+        height: aspectRatio === '1:1' ? 1024 : 1152
       })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return json(502, { detail: data?.error?.message || 'Gemini rejected the image request.' });
+      return json(502, { detail: data?.errors?.[0]?.message || data?.message || 'Cloudflare rejected the image request.' });
     }
 
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find(part => part?.inlineData?.data && part?.inlineData?.mimeType);
-    if (!imagePart) return json(502, { detail: 'Gemini returned no image. Try a different prompt.' });
-    return json(200, {
-      image: imagePart.inlineData.data,
-      mimeType: imagePart.inlineData.mimeType
-    });
+    const image = data?.result?.image;
+    if (!image) return json(502, { detail: 'Cloudflare returned no image. Try a different prompt.' });
+    return json(200, { image, mimeType: 'image/png' });
   } catch {
-    return json(502, { detail: 'Could not reach Gemini.' });
+    return json(502, { detail: 'Could not reach Cloudflare Workers AI.' });
   }
 };
