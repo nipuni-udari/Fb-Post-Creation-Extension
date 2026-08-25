@@ -67,17 +67,19 @@ Output only the finished description.'''
 
 
 def image_prompt(story: str, headline: str, composition: str) -> str:
-    return f'''Write ONE image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph that will sit behind this Facebook post.
+    return f'''Write ONE detailed image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph behind this Facebook post.
 
 HEADLINE: "{headline}"
-STORY:
+SOURCE STORY:
 """{story}"""
 
-Write in natural UK English. Make the image emotionally engaging and ultra-realistic, so someone scrolling immediately feels the human stakes of the headline. Show one concrete editorial scene with one clear subject, believable emotion, natural light, shallow depth of field and a 35mm lens. Use an anonymous person, hands, an object or a place, never a recognisable public figure.
+First identify the headline's central human question and the single subject that must carry it visually. Create a scene that makes someone scrolling stop and feel the issue before reading the words. The subject must be unmistakable and visually dominant, placed prominently in the foreground and midground. Add only secondary details that strengthen the story: a relevant object, place, vehicle, building, landscape or anonymous observer in the background. Never turn the image into a generic symbol or a collage.
 
-LAYOUT: {composition}
+Describe a high-emotional-engagement, ultra-realistic editorial photograph in a recognisably British setting when the story supports it. Make the emotion visible through expression, posture, hands, distance, gesture and body language. Match the mood precisely: urgent and tense for danger or conflict, worried and intimate for household impact, dignified and human for loss, quietly absurd for a wry story. Use believable scale, authentic materials, natural imperfections and documentary photojournalism. State the lighting, weather, atmosphere, camera position, lens and depth of field. Apply this layout constraint: {composition}
 
-The image must contain no text, letters, numbers, logos, watermarks or celebrity likeness. It must look like a real press photograph, not an illustration or a smiling stock photo. Write one paragraph of 45 to 70 words, comma separated: subject first, then setting, then light, then camera. End with: "no text, no logos, negative space where the caption sits". Output only that paragraph.'''
+The final prompt must explicitly forbid text, captions, letters, numbers, logos, watermarks, signs with readable writing, recognisable public figures, politicians, celebrities, propaganda-poster styling, CGI, illustration, cartoon effects, distorted anatomy, extra fingers, duplicated people, exaggerated action-movie effects and a glossy stock-photo look. Do not invent facts, uniforms, locations or objects that the story does not support.
+
+Output only the finished prompt as one polished paragraph of 100 to 170 words. Begin with: "Ultra-realistic, high-emotional-engagement editorial photograph asking: {headline}". Then describe the dominant subject, composition, setting, atmosphere, emotion, lighting and camera. End with: "no text, no captions, no logos, no watermarks, no recognisable public figures, negative space where the caption sits". No preamble, quotes or labels.'''
 
 
 @app.get("/", include_in_schema=False)

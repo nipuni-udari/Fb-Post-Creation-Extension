@@ -1137,35 +1137,30 @@ const COMPOSITION = {
   H:'large text, a flag bar and a reaction row cover the lower half, so keep it plain and put the subject higher in the frame'
 };
 
-const IMAGE_PROMPT = (d, h, comp) => `Write ONE image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph that will sit behind this Facebook post.
+const IMAGE_PROMPT = (d, h, comp) => `Write ONE detailed image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph behind this Facebook post.
 
-THE HEADLINE ON THE POST: "${h}"
-THE STORY IT CAME FROM: """${d}"""
+HEADLINE: "${h}"
+SOURCE STORY: """${d}"""
 
-The photograph has to make someone scrolling stop and feel the headline before they read it. Work out what the headline is really about — who it affects, where it happens, what object or gesture stands for it — and describe that one concrete scene.
+First identify the headline's central human question and the single subject that must carry it visually. Create a scene that makes someone scrolling stop and feel the issue before reading the words. The subject must be unmistakable and visually dominant, placed prominently in the foreground and midground. Add only secondary details that strengthen the story: a relevant object, place, vehicle, building, landscape or anonymous observer in the background. Never turn the image into a generic symbol or a collage.
 
-The image must:
-- be an emotionally engaging, ultra-realistic editorial photograph: natural light, believable human emotion, shallow depth of field, 35mm lens, muted realistic colour
-- show ONE clear subject that a stranger would connect to the headline in a second — a person from behind or in three-quarter view, hands doing something, an object, a doorway, a street
-- match the mood of the headline: if it is angry, make it tense; if it is about money, show the thing money is spent on; if it is wry, make it plain and slightly absurd
-- be composed for the layout: ${comp}
-- contain NO text, NO letters, NO numbers, NO logos, NO watermarks, NO real or recognisable public figures, NO celebrity likeness
-- look like a press photograph, not an illustration and not a stock photo with people smiling at the camera
+Describe a high-emotional-engagement, ultra-realistic editorial photograph in a recognisably British setting when the story supports it. Make the emotion visible through expression, posture, hands, distance, gesture and body language. Match the mood precisely: urgent and tense for danger or conflict, worried and intimate for household impact, dignified and human for loss, quietly absurd for a wry story. Use believable scale, authentic materials, natural imperfections and documentary photojournalism. State the lighting, weather, atmosphere, camera position, lens and depth of field. Apply this layout constraint: ${comp}
 
-Write it as one paragraph of 45 to 70 words in English, comma separated: subject first, then setting, then light, then camera. End with: "no text, no logos, negative space where the caption sits".
+The final prompt must explicitly forbid text, captions, letters, numbers, logos, watermarks, signs with readable writing, recognisable public figures, politicians, celebrities, propaganda-poster styling, CGI, illustration, cartoon effects, distorted anatomy, extra fingers, duplicated people, exaggerated action-movie effects and a glossy stock-photo look. Do not invent facts, uniforms, locations or objects that the story does not support.
 
-Output only that paragraph. No preamble, no quotes, no labels.`;
+Output only the finished prompt as one polished paragraph of 100 to 170 words. Begin with: "Ultra-realistic, high-emotional-engagement editorial photograph asking: ${h}". Then describe the dominant subject, composition, setting, atmosphere, emotion, lighting and camera. End with: "no text, no captions, no logos, no watermarks, no recognisable public figures, negative space where the caption sits". No preamble, quotes or labels.`;
 
 /* a usable brief with no model at all, built from the headline itself */
 function localBrief(){
   const h = (S.headline || '').replace(/[?!.]+$/,'').trim();
   const stop = /^(the|a|an|is|are|be|to|of|for|and|or|in|on|at|it|we|you|they|should|would|le|la|les|des|du|de|un|une|et|ou|en|qui|que|est|sont|pour|dans|avec|pas|vous|on|il|ils|faut|faut-il)$/i;
   const key = h.split(/\s+/).filter(w => w.length > 3 && !stop.test(w)).slice(0, 6).join(', ');
-  return `Photorealistic editorial press photograph about ${key || h}, one anonymous ordinary person seen from behind `
-    + `or in three-quarter view with the relevant object or place in frame, real street or interior setting, `
-    + `natural overcast daylight, shallow depth of field, 35mm lens, muted realistic colour, documentary mood, `
+  return `Ultra-realistic, high-emotional-engagement editorial photograph asking: ${S.headline}, dominant subject ${key || h} in the foreground and midground, `
+    + `one anonymous person in a natural three-quarter view with the relevant object or place clearly supporting the story, `
+    + `recognisably British street or interior setting where relevant, visible human emotion and believable body language, `
+    + `natural overcast daylight, realistic weather and environmental imperfections, shallow depth of field, 35mm lens, muted realistic colour, documentary photojournalism, `
     + `${COMPOSITION[S.tpl] || 'keep the lower half calm'}, `
-    + `no text, no logos, no recognisable public figures, negative space where the caption sits.`;
+    + `no text, no captions, no letters, no numbers, no logos, no watermarks, no recognisable public figures, no CGI, no illustration, no propaganda-poster styling, no distorted anatomy, negative space where the caption sits.`;
 }
 
 function localCaption(){
