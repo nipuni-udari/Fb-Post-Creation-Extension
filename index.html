@@ -365,6 +365,27 @@
         JPG, PNG, WebP, GIF, AVIF, BMP, SVG — or an MP4, and a frame gets taken from it
       </div>
       <input type="file" id="file" accept="image/*,video/*,.svg,.avif,.bmp,.heic" hidden>
+      <div id="now-then-images" hidden style="margin-top:12px">
+        <p class="note">Now &amp; Then uses two images: upload the modern view first and the nostalgic view second.</p>
+        <div class="row">
+          <div style="flex:1 1 220px;min-width:0">
+            <label class="lbl" for="now-file">Now image</label>
+            <div class="drop split-drop" id="now-drop"><b>Choose the NOW image</b>Modern view</div>
+            <input type="file" id="now-file" accept="image/*,video/*,.svg,.avif,.bmp,.heic" hidden>
+          </div>
+          <div style="flex:1 1 220px;min-width:0">
+            <label class="lbl" for="then-file">Then image</label>
+            <div class="drop split-drop" id="then-drop"><b>Choose the THEN image</b>Nostalgic view</div>
+            <input type="file" id="then-file" accept="image/*,video/*,.svg,.avif,.bmp,.heic" hidden>
+          </div>
+        </div>
+        <div class="tune" id="split-tune" hidden>
+          <label for="now-zoom">Now zoom</label><input type="range" id="now-zoom" min="100" max="260" value="100">
+          <label for="now-ox">Now left · right</label><input type="range" id="now-ox" min="-50" max="50" value="0">
+          <label for="then-zoom">Then zoom</label><input type="range" id="then-zoom" min="100" max="260" value="100">
+          <label for="then-ox">Then left · right</label><input type="range" id="then-ox" min="-50" max="50" value="0">
+        </div>
+      </div>
       <div class="tune" id="tune" hidden>
         <label for="zoom">Zoom</label><input type="range" id="zoom" min="100" max="260" value="100">
         <label for="ox">Left · right</label><input type="range" id="ox" min="-50" max="50" value="0">
@@ -377,7 +398,7 @@
 
   <!-- 4 -->
   <section class="step" id="s4" data-locked="1">
-    <div class="step-head"><div class="num">4</div><div class="step-title">Template<span class="step-sub" id="sub4">8 layouts</span></div><div class="chev">▾</div></div>
+    <div class="step-head"><div class="num">4</div><div class="step-title">Template<span class="step-sub" id="sub4">9 layouts</span></div><div class="chev">▾</div></div>
     <div class="step-body">
       <div class="picks" id="picks"></div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:13px">
@@ -448,6 +469,7 @@ const S = {
   headline:'', highlight:'', highlight2:'', yes:'YES', no:'NO',
   caption:'',
   prompt:'', img:null, zoom:1, ox:0, oy:0,
+  nowImg:null, thenImg:null, nowZoom:1, nowOx:0, thenZoom:1, thenOx:0,
   tpl:'A', size:'1:1',
   react:true, emoji:false, badge:'DEBATE',
   subtitle:'Facts, figures and analysis', brand:''
@@ -994,6 +1016,40 @@ function drawG(ctx, W, H, st){
   ctx.letterSpacing = '0px';
 }
 
+function glossyReaction(ctx, x, y, w, h, colour, label, kind){
+  const g = ctx.createLinearGradient(0, y, 0, y+h);
+  g.addColorStop(0, colour === 'blue' ? '#4b9cff' : '#ff5a63');
+  g.addColorStop(0.45, colour === 'blue' ? '#0878ee' : '#ed1f2b');
+  g.addColorStop(1, colour === 'blue' ? '#0045b8' : '#b90015');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x,y,w,h,h/2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = Math.max(2,w*.004);
+  ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+  setFace(ctx, {family:DISPLAY}, Math.round(h*.42));
+  const iconSize = h*.50;
+  if(kind === 'thumb') thumb(ctx, x+w*.78, y+h/2, iconSize, '#fff');
+  else heart(ctx, x+w*.78, y+h/2, iconSize, '#fff');
+  ctx.textAlign = 'center'; ctx.fillText(label, x+w*.38, y+h/2+h*.02); ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+function drawI(ctx, W, H, st){
+  ctx.fillStyle = '#050505'; ctx.fillRect(0,0,W,H);
+  const top = H*.25, bottom = H*.14, imageH = H-top-bottom;
+  const half = W/2;
+  if(st.nowImg){ ctx.save(); ctx.beginPath(); ctx.rect(0,top,half,imageH); ctx.clip(); cover(ctx,st.nowImg,0,top,half,imageH,st.nowZoom,st.nowOx,0); ctx.restore(); }
+  else { ctx.save(); ctx.translate(0,top); placeholder(ctx,half,imageH); ctx.restore(); }
+  if(st.thenImg){ ctx.save(); ctx.beginPath(); ctx.rect(half,top,half,imageH); ctx.clip(); cover(ctx,st.thenImg,half,top,half,imageH,st.thenZoom,st.thenOx,0); ctx.restore(); }
+  else { ctx.save(); ctx.translate(half,top); placeholder(ctx,half,imageH); ctx.restore(); }
+  ctx.fillStyle = '#fff'; ctx.fillRect(half-W*.004,top,W*.008,imageH);
+
+  const headline = fit(ctx, tokenize(st.headline.toUpperCase(), st.highlight, st.highlight2), W*.90, top*.80, W*.105, .90, '-0.01em', {family:DISPLAY});
+  drawLines(ctx,headline,W/2,top*.10+(top*.80-blockH(headline))/2,'center','#fff',{yellow:'#f5c518',red:'#ff3b30'});
+  const buttonY = H-bottom*.83, buttonH = bottom*.58, buttonW = W*.39;
+  glossyReaction(ctx,W*.06,buttonY,buttonW,buttonH,'blue',(st.yes||'YES').toUpperCase(),'thumb');
+  glossyReaction(ctx,W*.55,buttonY,buttonW,buttonH,'red',(st.no||'NO').toUpperCase(),'heart');
+}
+
 const TPL = {
   A:{name:'Poll panel',  hint:'Navy block + tricolor', draw:drawA},
   B:{name:'Debate',       hint:'Full bleed + flag bar + poll', draw:drawB},
@@ -1002,7 +1058,8 @@ const TPL = {
   E:{name:'Caption bar', hint:'Photo above, black bar',  draw:drawE},
   F:{name:'Kicker',      hint:'Orange label + big caps', draw:drawF},
   G:{name:'Big poll',    hint:'YES / NO on navy',        draw:drawG},
-  H:{name:'Kicker + poll', hint:'Orange label + flag bar + poll', draw:drawH}
+  H:{name:'Kicker + poll', hint:'Orange label + flag bar + poll', draw:drawH},
+  I:{name:'Now & Then', hint:'Modern / nostalgic split poll', draw:drawI}
 };
 
 function render(canvas, w, h, st){
@@ -1019,12 +1076,12 @@ function paint(){
   const [w,h] = DIMS[S.size];
   render($('#preview'), w, h, S);
   paintThumbs();
-  const ready = S.headline.trim() && S.img;
+  const ready = S.headline.trim() && (S.tpl === 'I' ? S.nowImg && S.thenImg : S.img);
   $('#download').disabled = !ready;
   $('#download-jpg').disabled = !ready;
   $('#stagenote').textContent = ready
     ? `${TPL[S.tpl].name} · ${S.size} · exports at ${w*2} × ${h*2} px`
-    : 'Add a headline and an image to see the post build itself.';
+    : S.tpl === 'I' ? 'Add both Now and Then images to see the split post build itself.' : 'Add a headline and an image to see the post build itself.';
 }
 
 /* ============================================================
@@ -1037,7 +1094,20 @@ function buildPicks(){
     b.className = 'pick'; b.dataset.tpl = k;
     b.setAttribute('aria-pressed', S.tpl===k);
     b.innerHTML = `<canvas></canvas><span><b style="display:block;color:inherit;font-size:12px">${t.name}</b>${t.hint}</span>`;
-    b.onclick = ()=>{ S.tpl = k; buildPicks(); paint(); };
+    b.onclick = ()=>{
+      S.tpl = k;
+      if(k === 'I'){
+        S.size = '4:5';
+        $('#now-then-images').hidden = false;
+        $('#drop').hidden = true; $('#file').disabled = true;
+        document.querySelectorAll('.size').forEach(x => { x.setAttribute('aria-pressed', x.dataset.size === '4:5'); x.disabled = true; });
+      }else{
+        $('#now-then-images').hidden = true;
+        $('#drop').hidden = false; $('#file').disabled = false;
+        document.querySelectorAll('.size').forEach(x => x.disabled = false);
+      }
+      buildPicks(); paint();
+    };
     box.appendChild(b);
   });
   paintThumbs();
@@ -1134,7 +1204,8 @@ const COMPOSITION = {
   E:'the picture sits above a caption bar, so centre the subject and keep the very bottom strip unimportant',
   F:'large text covers the lower third, so keep it plain and put the subject higher in the frame',
   G:'the bottom third is a solid panel, so compose the subject in the top two thirds',
-  H:'large text, a flag bar and a reaction row cover the lower half, so keep it plain and put the subject higher in the frame'
+  H:'large text, a flag bar and a reaction row cover the lower half, so keep it plain and put the subject higher in the frame',
+  I:'a black headline bar fills the top quarter and glossy reaction buttons fill the bottom; split the remaining image area evenly, with NOW on the left and THEN on the right, keeping both subjects clear'
 };
 
 const IMAGE_PROMPT = (d, h, comp) => `Write ONE detailed image-generation prompt for ChatGPT Image, Google Flow or Nano Banana for the photograph behind this Facebook post.
@@ -1165,6 +1236,7 @@ function localCaption(){
   const headline = (S.headline || 'This story deserves a closer look').trim();
   const story = (S.desc || '').trim();
   const detail = story ? story.replace(/\s+/g, ' ').slice(0, 320).replace(/[.!?]+$/, '') : 'The details matter, and so does the impact on ordinary people';
+  if(S.tpl === 'I') return `${headline}\n\nThere was a time when this felt simpler. You knew the people, the routine and the little details that made an ordinary day feel familiar. Today, the same thing can feel quicker and more convenient, but perhaps a little less personal.\n\n${detail}. Some changes make life easier, while others leave us wondering what we have lost along the way.\n\nHit YES if you are with the old ways, or NO if you have moved on 👍❤️\n\n#OldSchoolBritain #BritishNostalgia #UKLife`;
   return `${headline}\n\nThis is the sort of story that can be easy to scroll past, but it raises a question many people in Britain will recognise: who benefits, who pays, and who gets a proper say?\n\n${detail}. Whatever your first reaction, the facts deserve a fair hearing before the arguments begin.\n\nWhere do you stand on this?`;
 }
 
@@ -1324,7 +1396,8 @@ async function makeCaption(){
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         story: S.desc || S.headline,
-        headline: S.headline
+        headline: S.headline,
+        format: S.tpl === 'I' ? 'now-then' : 'standard'
       })
     });
     const data = await response.json().catch(() => ({}));
@@ -1425,21 +1498,32 @@ async function decodeAnyFile(file){
   }finally{ setTimeout(()=> URL.revokeObjectURL(url), 5000); }
 }
 
-async function loadFile(f){
+async function loadFile(f, slot){
   if(!f){ return; }
   hide('#err3');
-  $('#drop').innerHTML = '<b>Reading…</b>' + escapeHTML(f.name || 'file');
+  const dropTarget = slot === 'nowImg' ? $('#now-drop') : slot === 'thenImg' ? $('#then-drop') : $('#drop');
+  dropTarget.innerHTML = '<b>Reading…</b>' + escapeHTML(f.name || 'file');
   try{
     const { canvas, kind } = await decodeAnyFile(f);
-    S.img = canvas; S.zoom = 1; S.ox = 0; S.oy = 0; GEN.tainted = false;
-    $('#zoom').value = 100; $('#ox').value = 0; $('#oy').value = 0;
-    $('#tune').hidden = false; $('#to-tpl').disabled = false;
-    $('#drop').innerHTML = `<b>${escapeHTML(f.name || 'image')}</b>${canvas.width} × ${canvas.height}`
+    if(slot){
+      S[slot] = canvas;
+      const prefix = slot === 'nowImg' ? 'now' : 'then';
+      S[prefix + 'Zoom'] = 1; S[prefix + 'Ox'] = 0;
+      $(`#${prefix}-zoom`).value = 100; $(`#${prefix}-ox`).value = 0;
+      $('#split-tune').hidden = !(S.nowImg && S.thenImg);
+      $('#to-tpl').disabled = !(S.nowImg && S.thenImg);
+    }else{
+      S.img = canvas; S.zoom = 1; S.ox = 0; S.oy = 0; GEN.tainted = false;
+      $('#zoom').value = 100; $('#ox').value = 0; $('#oy').value = 0;
+      $('#tune').hidden = false; $('#to-tpl').disabled = false;
+    }
+    dropTarget.innerHTML = `<b>${escapeHTML(f.name || 'image')}</b>${canvas.width} × ${canvas.height}`
       + (kind === 'frame' ? ' · frame taken from the video' : '') + ' · click to replace';
-    done('s3', kind === 'frame' ? 'Video frame in place' : 'Image in place');
+    if(slot) done('s3', S.nowImg && S.thenImg ? 'Now & Then images in place' : `${slot === 'nowImg' ? 'Now' : 'Then'} image in place`);
+    else done('s3', kind === 'frame' ? 'Video frame in place' : 'Image in place');
     paint();
   }catch(e){
-    $('#drop').innerHTML = '<b>Drop a picture here</b>click to browse, or paste with \u2318V / Ctrl+V';
+    dropTarget.innerHTML = slot === 'nowImg' ? '<b>Choose the NOW image</b>Modern view' : slot === 'thenImg' ? '<b>Choose the THEN image</b>Nostalgic view' : '<b>Drop a picture here</b>click to browse, or paste with \u2318V / Ctrl+V';
     show('#err3', e.message);
   }
 }
@@ -1771,6 +1855,12 @@ $('#copy-prompt').onclick = async ()=>{
 const drop = $('#drop');
 drop.onclick = ()=> $('#file').click();
 $('#file').onchange = e => loadFile(e.target.files[0]);
+const nowDrop = $('#now-drop');
+const thenDrop = $('#then-drop');
+nowDrop.onclick = ()=> $('#now-file').click();
+thenDrop.onclick = ()=> $('#then-file').click();
+$('#now-file').onchange = e => loadFile(e.target.files[0], 'nowImg');
+$('#then-file').onchange = e => loadFile(e.target.files[0], 'thenImg');
 ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop', e=> loadFile(e.dataTransfer.files[0]));
@@ -1782,6 +1872,10 @@ window.addEventListener('paste', e=>{
 $('#zoom').oninput = e => { S.zoom = e.target.value/100; paint(); };
 $('#ox').oninput   = e => { S.ox = e.target.value/50; paint(); };
 $('#oy').oninput   = e => { S.oy = e.target.value/50; paint(); };
+$('#now-zoom').oninput = e => { S.nowZoom = e.target.value/100; paint(); };
+$('#now-ox').oninput = e => { S.nowOx = e.target.value/50; paint(); };
+$('#then-zoom').oninput = e => { S.thenZoom = e.target.value/100; paint(); };
+$('#then-ox').oninput = e => { S.thenOx = e.target.value/50; paint(); };
 
 $('#to-tpl').onclick = ()=>{ unlock('s4'); open('s4'); };
 $('#to-size').onclick = ()=>{ done('s4', TPL[S.tpl].name); unlock('s5'); open('s5'); };
@@ -1794,6 +1888,7 @@ $('#brand').oninput        = e => { S.brand = e.target.value; paint(); };
 
 document.querySelectorAll('.size').forEach(b=>{
   b.onclick = ()=>{
+    if(S.tpl === 'I') return;
     S.size = b.dataset.size;
     document.querySelectorAll('.size').forEach(x=> x.setAttribute('aria-pressed', x===b));
     done('s5', S.size); paint();

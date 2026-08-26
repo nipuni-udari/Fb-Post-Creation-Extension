@@ -12,7 +12,12 @@ function json(statusCode, body) {
   return { statusCode, headers, body: JSON.stringify(body) };
 }
 
-function captionPrompt(story, headline) {
+function captionPrompt(story, headline, format) {
+  const nowThenRules = format === 'now-then' ? `
+- This is a "Now and Then" comparison. Write warmly about the contrast between modern life and the older British way suggested by the headline.
+- For this format, override the general length: write 120 to 200 words in 3 to 5 short paragraphs.
+- Include a believable, relatable memory-style moment for a UK reader aged 40 or over, but do not invent specific facts about the news story.
+- End with a natural invitation to comment by choosing YES or NO, followed by 3 to 5 relevant UK nostalgia hashtags.` : '';
   return `Write a long Facebook post description based only on this news story and headline.
 
 STORY:
@@ -32,6 +37,7 @@ RULES
 - Build towards a memorable closing thought that returns to the central question or headline.
 - End with one direct, open question inviting people to share their view in the comments.
 - Do not use headings, bullet points, fake quotes, invented statistics or instructions to like and share. A small number of relevant emojis is allowed only when it genuinely suits the story.
+${nowThenRules}
 
 Output only the finished description.`;
 }
@@ -52,6 +58,7 @@ exports.handler = async function handler(event) {
 
   const story = typeof request.story === 'string' ? request.story.trim() : '';
   const headline = typeof request.headline === 'string' ? request.headline.trim() : '';
+  const format = request.format === 'now-then' ? 'now-then' : 'standard';
   if (!story || story.length > 20000 || !headline || headline.length > 500) {
     return json(400, { detail: 'A valid story and headline are required.' });
   }
@@ -62,7 +69,7 @@ exports.handler = async function handler(event) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: GROQ_MODEL,
-        messages: [{ role: 'user', content: captionPrompt(story, headline) }],
+        messages: [{ role: 'user', content: captionPrompt(story, headline, format) }],
         temperature: 0.8,
         max_tokens: 1400
       })
