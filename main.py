@@ -67,7 +67,9 @@ RULES
 - Develop the human impact in a warm, conversational storytelling style. Use repetition sparingly for emphasis and ask a few rhetorical questions, like the example style, but keep every claim supported by the story.
 - Connect the issue to everyday British life only when the story supports that connection. Acknowledge that people have different budgets, experiences and opinions.
 - Build towards a memorable closing thought that returns to the central question or headline.
-- End with one direct, open question inviting people to share their view in the comments.
+- CRITICAL: Finish every paragraph and every sentence. Before writing, plan the complete structure so the post does not stop mid-thought.
+- The final paragraph must be a memorable, emotionally resonant closing thought that returns to the central question or headline, followed by one direct, open question inviting people to share their view in the comments.
+- Do not end with an unfinished sentence, a vague promise, a heading, or a cut-off call to action. The final characters must be the completed comment question.
 - Do not use headings, bullet points, fake quotes, invented statistics or instructions to like and share. A small number of relevant emojis is allowed only when it genuinely suits the story.
 {comparison_rules}
 
@@ -103,9 +105,9 @@ async def generate_caption(request: CaptionRequest) -> CaptionResponse:
 
     payload = {
         "model": GROQ_MODEL,
-        "messages": [{"role": "user", "content": caption_prompt(request.story, request.headline)}],
+        "messages": [{"role": "user", "content": caption_prompt(request.story, request.headline, request.format)}],
         "temperature": 0.8,
-        "max_tokens": 1400,
+        "max_tokens": 2400,
     }
     headers = {"Authorization": f"Bearer {api_key}"}
 
