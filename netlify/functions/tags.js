@@ -50,12 +50,13 @@ exports.handler = async function handler(event) {
         model: GROQ_MODEL,
         messages: [{ role: 'user', content: tagsPrompt(story, headline) }],
         temperature: 0.5,
-        max_tokens: 100
+        max_tokens: 300
       })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) return json(502, { detail: data?.error?.message || 'Groq rejected the tag request.' });
-    const tags = data?.choices?.[0]?.message?.content?.trim();
+    const message = data?.choices?.[0]?.message;
+    const tags = (message?.content || data?.choices?.[0]?.text || '').trim();
     if (!tags) return json(502, { detail: 'Groq returned no tags.' });
     return json(200, { tags });
   } catch { return json(502, { detail: 'Could not reach Groq.' }); }
