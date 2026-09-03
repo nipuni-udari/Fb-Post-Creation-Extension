@@ -285,6 +285,17 @@
         <div class="err" id="err-caption" hidden></div>
       </div>
 
+      <div class="freegen" style="margin-top:14px">
+        <div class="freegen-head">Viral tags</div>
+        <div class="row">
+          <button class="btn" id="gen-tags" style="flex:0 0 auto">Find 5 viral tags</button>
+          <button class="btn ghost sm" id="copy-tags" style="flex:0 0 auto" disabled>Copy tags</button>
+        </div>
+        <label class="lbl" style="margin-top:12px" for="tags">Five relevant, high-reach Facebook hashtags</label>
+        <textarea id="tags" style="min-height:70px" placeholder="Find five relevant tags for this story."></textarea>
+        <div class="err" id="err-tags" hidden></div>
+      </div>
+
       <div class="row" style="margin-top:12px">
         <div style="flex:0 0 140px;min-width:120px">
           <label class="lbl" for="lbl-yes">Thumb label (YES)</label>
@@ -467,7 +478,7 @@
 const S = {
   desc:'', headlines:[], pick:-1,
   headline:'', highlight:'', highlight2:'', yes:'YES', no:'NO',
-  caption:'',
+  caption:'', tags:'',
   prompt:'', img:null, zoom:1, ox:0, oy:0,
   nowImg:null, thenImg:null, nowZoom:1, nowOx:0, thenZoom:1, thenOx:0,
   tpl:'A', size:'1:1',
@@ -1237,6 +1248,30 @@ function localCaption(){
   return `${headline}\n\nThis is the sort of story that can be easy to scroll past, but it raises a question many people in Britain will recognise: who benefits, who pays, and who gets a proper say?\n\n${detail}. Whatever your first reaction, the facts deserve a fair hearing before the arguments begin.\n\nWhere do you stand on this?`;
 }
 
+function localTags(){
+  const source = `${S.headline} ${S.desc}`.toLowerCase();
+  const tags = [];
+  const add = tag => { if(!tags.includes(tag)) tags.push(tag); };
+  if(/crime|police|court|criminal|offence|offense|violence|knife|theft/.test(source)) add('#YouthCrime');
+  if(/young|youth|teen|child|school/.test(source)) add('#YoungPeople');
+  if(/uk|britain|british|england|scotland|wales|council|nhs|government|parliament/.test(source)) add('#UKNews');
+  if(/cost|money|price|tax|pay|benefit|budget|public/.test(source)) add('#CostOfLiving');
+  add('#News');
+  add('#CurrentAffairs');
+  add('#HaveYourSay');
+  return tags.slice(0, 5).join(' ');
+}
+
+function cleanTags(value){
+  const found = (value || '').match(/#[\p{L}\p{N}_]+/gu) || [];
+  const unique = [];
+  found.forEach(tag => {
+    const normal = '#' + tag.slice(1).replace(/_/g, '');
+    if(normal.length > 1 && !unique.some(item => item.toLowerCase() === normal.toLowerCase())) unique.push(normal);
+  });
+  return unique.slice(0, 5).join(' ');
+}
+
 /* ---------- step 1 ---------- */
 async function makeHeadlines(){
   const d = $('#desc').value.trim();
@@ -1408,6 +1443,27 @@ async function makeCaption(){
     show('#err-caption', explain(e) + ' A draft built from your headline is below — edit it before posting.');
   }
   finally{ b.disabled = false; b.textContent = S.caption ? 'Rewrite the description' : 'Write the description'; }
+}
+
+async function makeTags(){
+  if(!S.headline.trim()){ show('#err-tags','Pick or write a headline first — the tags are built from it.'); return; }
+  const b = $('#gen-tags');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>Finding…';
+  try{
+    const response = await fetch('/.netlify/functions/tags', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ story: S.desc || S.headline, headline: S.headline })
+    });
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || `Tag service returned HTTP ${response.status}.`);
+    const tags = cleanTags(data.tags);
+    if(tags.split(' ').length !== 5) throw new Error('The tag service returned fewer than five tags.');
+    S.tags = tags; $('#tags').value = tags; $('#copy-tags').disabled = false; hide('#err-tags');
+  }catch(e){
+    S.tags = localTags(); $('#tags').value = S.tags; $('#copy-tags').disabled = !S.tags; show('#err-tags', explain(e) + ' Relevant tags are below — edit them if needed.');
+  }
+  finally{ b.disabled = false; b.textContent = 'Find 5 viral tags'; }
 }
 
 /* everything the browser can possibly decode ends up as a plain canvas,
@@ -1804,6 +1860,14 @@ $('#copy-caption').onclick = async ()=>{
   try{ await navigator.clipboard.writeText(S.caption); $('#copy-caption').textContent = 'Copied'; }
   catch{ $('#caption').select(); $('#copy-caption').textContent = 'Press Ctrl+C'; }
   setTimeout(()=> $('#copy-caption').textContent = 'Copy description', 1600);
+};
+
+$('#gen-tags').onclick = makeTags;
+$('#tags').oninput = e => { S.tags = cleanTags(e.target.value); $('#copy-tags').disabled = !S.tags; };
+$('#copy-tags').onclick = async ()=>{
+  try{ await navigator.clipboard.writeText(S.tags); $('#copy-tags').textContent = 'Copied'; }
+  catch{ $('#tags').select(); $('#copy-tags').textContent = 'Press Ctrl+C'; }
+  setTimeout(()=> $('#copy-tags').textContent = 'Copy tags', 1600);
 };
 
 $('#to-img').onclick = ()=>{
