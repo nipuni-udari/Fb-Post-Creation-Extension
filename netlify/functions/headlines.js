@@ -30,6 +30,36 @@ RULES
 Output exactly four lines, one headline per line, with no numbers, bullets, labels or commentary.`;
 }
 
+function responseText(data) {
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content === 'string') return content.trim();
+  if (Array.isArray(content)) {
+    return content
+      .filter(part => part && part.type === 'text' && typeof part.text === 'string')
+      .map(part => part.text)
+      .join('\n')
+      .trim();
+  }
+  return '';
+}
+
+async function requestHeadlines(apiKey, story, headlinePrompt) {
+  const response = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: 'user', content: headlinePrompt(story) }],
+      temperature: 0.8,
+      reasoning_effort: 'low',
+      max_completion_tokens: 400
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error?.message || 'Groq rejected the headline request.');
+  return responseText(data);
+}
+
 exports.handler = async function handler(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
   if (event.httpMethod !== 'POST') return json(405, { detail: 'POST required.' });
@@ -42,20 +72,13 @@ exports.handler = async function handler(event) {
   if (!story || story.length > 20000) return json(400, { detail: 'A valid story is required.' });
 
   try {
-    const response = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [{ role: 'user', content: prompt(story) }],
-        temperature: 0.8,
-        max_tokens: 180
-      })
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) return json(502, { detail: data?.error?.message || 'Groq rejected the headline request.' });
-    const result = data?.choices?.[0]?.message?.content?.trim();
+    let result = await requestHeadlines(apiKey, story, prompt);
+    if (!result) {
+      result = await requestHeadlines(apiKey, story, value => `Write four strong, accurate Facebook headlines for this story. Return only four short lines, one headline per line.\n\nSTORY:\n"""${value}"""`);
+    }
     if (!result) return json(502, { detail: 'Groq returned empty headlines.' });
     return json(200, { headlines: result });
-  } catch { return json(502, { detail: 'Could not reach Groq.' }); }
+  } catch (error) {
+    return json(502, { detail: error?.message || 'Could not reach Groq.' });
+  }
 };
